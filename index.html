@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verlof, overuren en ziekte Dashboard v8 - privacy master</title>
+<style>
+:root{
+  --bg:#f5f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;
+  --blue:#2563eb;--purple:#7c3aed;--green:#15803d;--orange:#d97706;--red:#dc2626;--teal:#0f766e;
+  --shadow:0 12px 30px rgba(15,23,42,.08);--radius:20px
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:var(--text)}
+.wrap{max-width:1420px;margin:0 auto;padding:22px}
+.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:18px}
+h1{margin:0;font-size:32px}.sub{color:var(--muted);margin-top:6px;line-height:1.5}
+.pill{background:#eef2ff;color:#3730a3;padding:10px 14px;border-radius:999px;font-size:14px;font-weight:800}
+.tabs{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+.tab-btn{border:1px solid var(--line);background:#fff;color:#111827;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:800}
+.tab-btn.active{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-color:transparent}
+.panel{display:none}.panel.active{display:block}.grid{display:grid;gap:16px}.kpis{grid-template-columns:repeat(4,1fr)}.two{grid-template-columns:1.15fr .85fr}.three{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}.card h2{margin:0 0 14px;font-size:18px}
+.kpi-title{color:var(--muted);font-size:14px}.kpi-value{font-size:30px;font-weight:900;margin-top:8px}
+.blue{color:var(--blue)}.purple{color:var(--purple)}.green{color:var(--green)}.orange{color:var(--orange)}.red{color:var(--red)}.teal{color:var(--teal)}
+.form{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.full{grid-column:1/-1}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:12px;background:#fff;font-size:14px}
+textarea{min-height:130px;resize:vertical}
+button{border:0;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;padding:12px 16px;border-radius:12px;font-weight:900;cursor:pointer}
+.btn-secondary{background:linear-gradient(135deg,#0f766e,#0891b2)}.btn-danger{background:linear-gradient(135deg,#b91c1c,#dc2626)}
+.btn-soft{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}.btn-gray{background:#f3f4f6;color:#111827;border:1px solid var(--line)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:top}
+th{color:var(--muted);font-weight:800}
+.tag{display:inline-block;padding:6px 10px;border-radius:999px;background:#f3f4f6;font-size:12px;font-weight:800}
+.tag.ok{background:#ecfdf5;color:#166534}.tag.warn{background:#fff7ed;color:#9a3412}.tag.bad{background:#fef2f2;color:#991b1b}.tag.info{background:#eff6ff;color:#1d4ed8}.tag.purple{background:#f5f3ff;color:#6d28d9}
+.list{display:grid;gap:10px}.row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}.muted{color:var(--muted)}.small{font-size:12px;color:var(--muted)}.empty{color:var(--muted);font-style:italic}
+.notice{padding:12px 14px;border-radius:14px;background:#fff7ed;color:#9a3412;font-size:13px;line-height:1.45}
+.info-box{padding:12px 14px;border-radius:14px;background:#eff6ff;color:#1e40af;font-size:13px;line-height:1.45}
+.status-box{padding:12px 14px;border-radius:14px;background:#f8fafc;border:1px solid var(--line);font-size:13px;color:var(--muted);line-height:1.5}
+.hero{background:linear-gradient(135deg,#1d4ed8 0%,#7c3aed 100%);color:#fff;border-radius:24px;padding:20px 22px;box-shadow:var(--shadow);margin-bottom:16px}
+.hero-grid{display:grid;grid-template-columns:1.3fr .7fr;gap:16px;align-items:center}.hero h2{margin:0 0 8px;font-size:26px}.hero p{margin:0;color:rgba(255,255,255,.9);line-height:1.5}
+.hero-stat{background:rgba(255,255,255,.12);padding:14px;border-radius:16px}.hero-stat .label{font-size:12px;opacity:.85}.hero-stat .value{font-size:26px;font-weight:900;margin-top:6px}
+.employee-card{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}.employee-main{display:flex;gap:12px;align-items:center}
+.avatar{width:38px;height:38px;border-radius:14px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900}
+.bar-row{display:grid;grid-template-columns:145px 1fr 120px;gap:12px;align-items:center}.bar-track{height:12px;background:#eef2ff;border-radius:999px;overflow:hidden}.bar-fill{height:100%;background:linear-gradient(135deg,#2563eb,#7c3aed)}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.cal-day{background:#fff;border:1px solid var(--line);border-radius:14px;min-height:118px;padding:8px}
+.cal-day.free-day{background:#f8fafc;border-color:#cbd5e1}.cal-day.holiday-day{background:#faf5ff;border-color:#ddd6fe}.cal-day.today-day{box-shadow:0 0 0 2px rgba(37,99,235,.22)}
+.cal-head{display:flex;justify-content:space-between;gap:6px;margin-bottom:6px}.cal-date{font-size:13px;font-weight:900}.cal-weekday{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase}
+.cal-item{font-size:11px;padding:4px 6px;border-radius:8px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-verlof{background:#ecfdf5;color:#166534}.cal-ziek{background:#fef2f2;color:#991b1b}.cal-overuren{background:#eff6ff;color:#1d4ed8}.cal-feestdag{background:#f5f3ff;color:#6d28d9}.cal-vrij{background:#f1f5f9;color:#475569}
+.weekday-settings{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.weekday-settings label{display:flex;gap:6px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px;margin:0;color:var(--text);font-weight:800}.weekday-settings input{width:auto;padding:0}
+.filterbar{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px}
+@media(max-width:1100px){.kpis,.three,.two,.hero-grid,.filterbar{grid-template-columns:1fr}.bar-row{grid-template-columns:1fr}.calendar-grid{grid-template-columns:1fr 1fr}.weekday-settings{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.form{grid-template-columns:1fr}.calendar-grid,.weekday-settings{grid-template-columns:1fr}h1{font-size:26px}.wrap{padding:14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Verlof, overuren en ziekte Dashboard</h1>
+      <div class="sub">v8 privacy master. GitHub Pages toont alleen de app. Personeelsdata wordt pas zichtbaar nadat een centraal JSON-bestand uit OneDrive/SharePoint is geopend.</div>
+    </div>
+    <div class="pill">v8 • privacy-modus</div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-grid">
+      <div>
+        <h2>Veilig werken met twee leidinggevenden</h2>
+        <p>Data blijft niet automatisch zichtbaar na afsluiten. Open eerst het centrale opslagbestand, werk bij, sla op en sluit veilig af.</p>
+      </div>
+      <div class="grid two" style="grid-template-columns:1fr 1fr">
+        <div class="hero-stat"><div class="label">Open aanvragen</div><div class="value" id="heroOpen">-</div></div>
+        <div class="hero-stat"><div class="label">Ziek vandaag</div><div class="value" id="heroSick">-</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="start">Start & opslag</button>
+    <button class="tab-btn" data-tab="dashboard">Dashboard</button>
+    <button class="tab-btn" data-tab="medewerkers">Medewerkers</button>
+    <button class="tab-btn" data-tab="nieuwe-registratie">Nieuwe registratie</button>
+    <button class="tab-btn" data-tab="aanvragen">Aanvragen</button>
+    <button class="tab-btn" data-tab="overuren">Overuren</button>
+    <button class="tab-btn" data-tab="ziekte">Ziekte</button>
+    <button class="tab-btn" data-tab="kalender">Kalender</button>
+    <button class="tab-btn" data-tab="saldo-uitleg">Saldo uitleg</button>
+    <button class="tab-btn" data-tab="controles">Controles</button>
+    <button class="tab-btn" data-tab="jaaroverzicht">Jaaroverzicht</button>
+    <button class="tab-btn" data-tab="medewerker-export">Medewerker export</button>
+    <button class="tab-btn" data-tab="auditlog">Auditlog</button>
+    <button class="tab-btn" data-tab="backup">Export</button>
+  </div>
+
+  <section class="panel active" id="tab-start">
+    <div class="grid two">
+      <div class="card">
+        <h2>Open centrale opslag</h2>
+        <div class="form">
+          <div><label>Naam leidinggevende</label><input id="managerName" placeholder="Bijv. Petra of Mark"></div>
+          <div><label>Status</label><input id="dataStatus" readonly value="Geen data geladen"></div>
+          <div class="full toolbar">
+            <button onclick="openCentralFile()">Open centraal JSON-bestand</button>
+            <button class="btn-secondary" onclick="createCentralFile()">Maak nieuw centraal bestand</button>
+            <button class="btn-gray" onclick="downloadEmptyTemplate()">Download leeg template</button>
+          </div>
+          <div class="full toolbar">
+            <button class="btn-secondary" onclick="saveToCentralFile()">Opslaan naar centraal bestand</button>
+            <button class="btn-danger" onclick="saveAndClose()">Opslaan & veilig afsluiten</button>
+            <button class="btn-soft" onclick="closeWithoutSaving()">Alleen lokaal wissen</button>
+          </div>
+        </div>
+        <div class="notice" style="margin-top:14px">
+          <strong>Veiligheidskeuze:</strong> dit dashboard gebruikt geen localStorage voor medewerkers, verlof, ziekte, overuren of auditlog. Na opnieuw openen is het dashboard leeg totdat je het centrale JSON-bestand kiest.
+        </div>
+      </div>
+      <div class="card">
+        <h2>Werkwijze voor 2 leidinggevenden</h2>
+        <div class="list">
+          <div class="row"><div>1. Open dashboard via GitHub Pages</div><span class="tag info">App</span></div>
+          <div class="row"><div>2. Open hetzelfde JSON-bestand uit OneDrive/SharePoint</div><span class="tag ok">Data</span></div>
+          <div class="row"><div>3. Voer wijzigingen door</div><span class="tag info">Werkbuffer</span></div>
+          <div class="row"><div>4. Sla op naar hetzelfde centrale bestand</div><span class="tag ok">Revisie + audit</span></div>
+          <div class="row"><div>5. Gebruik Opslaan & veilig afsluiten</div><span class="tag bad">Wist lokale data</span></div>
+        </div>
+        <div id="lockWarning" style="margin-top:14px"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-dashboard">
+    <div id="lockedDashboard" class="notice">Geen data geladen. Ga naar <strong>Start & opslag</strong> en open het centrale JSON-bestand.</div>
+    <div id="dashboardContent">
+      <div class="grid kpis" id="kpis"></div>
+      <div class="grid two" style="margin-top:16px">
+        <div class="card"><h2>Snelle status</h2><div class="list" id="quickStatus"></div></div>
+        <div class="card"><h2>Opslagstatus</h2><div id="backupMini" class="list"></div></div>
+      </div>
+      <div class="grid two" style="margin-top:16px">
+        <div class="card"><h2>Verlofuren per maand</h2><div id="monthlyBars" class="list"></div></div>
+        <div class="card"><h2>Acties voor leidinggevende</h2><div id="managerActions" class="list"></div></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+          <h2 style="margin:0">Laatste registraties</h2>
+          <div class="toolbar"><button class="btn-secondary" onclick="loadDemo()">Demo laden</button><button class="btn-danger" onclick="clearAllData()">Alles leegmaken</button></div>
+        </div>
+        <div id="recentTable" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-medewerkers">
+    <div class="grid two">
+      <div class="card">
+        <h2>Medewerker toevoegen / aanpassen</h2>
+        <div class="form">
+          <input id="e-edit-id" type="hidden">
+          <div class="full" id="employeeEditNotice" style="display:none"><div class="info-box"><strong>Bewerkmodus:</strong> wijzigingen komen in de auditlog.</div></div>
+          <div><label>Naam</label><input id="e-name"></div>
+          <div><label>E-mailadres</label><input id="e-email" type="email"></div>
+          <div><label>Functie / team</label><input id="e-role"></div>
+          <div><label>Contracturen per week</label><input id="e-contract" type="number" step="0.01" value="40"></div>
+          <div><label>Startsaldo verlofuren</label><input id="e-leave" type="number" step="0.01" value="200"></div>
+          <div><label>Startsaldo overuren</label><input id="e-overtime" type="number" step="0.01" value="0"></div>
+          <div><label>Status</label><select id="e-status"><option>Actief</option><option>Uit dienst</option></select></div>
+          <div class="full toolbar">
+            <button id="employeeSaveBtn" onclick="saveEmployeeForm()">Medewerker opslaan</button>
+            <button class="btn-gray" id="employeeCancelBtn" onclick="cancelEmployeeEdit()" style="display:none">Annuleren</button>
+            <button class="btn-secondary" onclick="loadDefaultEmployees()">10 voorbeeldmedewerkers laden</button>
+          </div>
+        </div>
+        <div class="notice" style="margin-top:14px">Zet medewerkers liever op <strong>Uit dienst</strong> dan verwijderen. Zo blijft de historie controleerbaar.</div>
+      </div>
+      <div class="card"><h2>Medewerkersoverzicht</h2><div id="employeeCards" class="list"></div></div>
+    </div>
+    <div class="card" style="margin-top:16px"><h2>Saldo per medewerker</h2><div id="employeeBalanceTable"></div></div>
+  </section>
+
+  <section class="panel" id="tab-nieuwe-registratie">
+    <div class="grid two">
+      <div class="card">
+        <h2>Nieuwe registratie</h2>
+        <div class="form">
+          <div><label>Medewerker</label><select id="r-employee"></select></div>
+          <div><label>Soort</label><select id="r-type" onchange="prefillByType()"><option>Verlof aanvraag</option><option>Verlof goedgekeurd</option><option>Verlof afgewezen</option><option>Overuren opgebouwd</option><option>Overuren opgenomen</option><option>Ziekmelding</option><option>Hersteldmelding</option><option>Correctie verlof</option><option>Correctie overuren</option></select></div>
+          <div><label>Startdatum</label><input id="r-start" type="date"></div>
+          <div><label>Einddatum</label><input id="r-end" type="date"></div>
+          <div><label>Uren</label><input id="r-hours" type="number" step="0.01"></div>
+          <div><label>Status</label><select id="r-status"><option>Aangevraagd</option><option>Goedgekeurd</option><option>Afgewezen</option><option>Geregistreerd</option></select></div>
+          <div><label>Categorie</label><select id="r-category"><option>Vakantie</option><option>Vrije dag</option><option>Bijzonder verlof</option><option>Overuren</option><option>Ziek</option><option>Correctie</option><option>Anders</option></select></div>
+          <div><label>Leidinggevende</label><input id="r-manager" placeholder="Wordt automatisch gevuld"></div>
+          <div class="full"><label>Zakelijke opmerking</label><input id="r-note" placeholder="Geen medische details. Bijv. akkoord per mail op datum"></div>
+          <div class="full toolbar"><button onclick="addRecord()">Registratie opslaan</button><button class="btn-secondary" onclick="prefillByType()">Soort slim invullen</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>v8-controles</h2>
+        <div class="list">
+          <div class="row"><div>Datumcontrole</div><span class="tag ok">Actief</span></div>
+          <div class="row"><div>Negatief saldo waarschuwing</div><span class="tag ok">Actief</span></div>
+          <div class="row"><div>Ziekmelding dubbelcheck</div><span class="tag ok">Actief</span></div>
+          <div class="row"><div>Herstel zonder ziekmelding</div><span class="tag ok">Actief</span></div>
+          <div class="row"><div>Revisiecontrole bij opslaan</div><span class="tag ok">Actief</span></div>
+        </div>
+        <div class="notice" style="margin-top:14px"><strong>Privacy bij ziekte:</strong> sla geen diagnose, klachten of medische oorzaak op. Alleen zakelijke afwezigheidsregistratie.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-aanvragen"><div class="card"><h2>Verlofaanvragen en verlofregistraties</h2><div class="filterbar"><div><label>Medewerker</label><select id="filterLeaveEmployee" onchange="render()"></select></div><div><label>Status</label><select id="filterLeaveStatus" onchange="render()"><option>Alles</option><option>Aangevraagd</option><option>Goedgekeurd</option><option>Afgewezen</option><option>Geregistreerd</option></select></div><div><label>Zoeken</label><input id="filterLeaveText" oninput="render()"></div><button class="btn-gray" onclick="resetFilters()">Reset</button></div><div id="leaveTable"></div></div></section>
+  <section class="panel" id="tab-overuren"><div class="grid two"><div class="card"><h2>Overurenoverzicht</h2><div id="overtimeTable"></div></div><div class="card"><h2>Overurensaldo</h2><div id="overtimeBalances" class="list"></div></div></div></section>
+  <section class="panel" id="tab-ziekte"><div class="grid two"><div class="card"><h2>Ziekteregistratie</h2><div id="sicknessTable"></div></div><div class="card"><h2>Vandaag ziek / open ziekmeldingen</h2><div id="sicknessStatus" class="list"></div><div class="notice" style="margin-top:14px">Bewaar hier geen medische details. Dit dashboard is bedoeld voor zakelijke afwezigheidsregistratie.</div></div></div></section>
+  <section class="panel" id="tab-kalender"><div class="card"><div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap"><h2 style="margin:0">Kalenderoverzicht</h2><div class="toolbar"><div><label>Maand</label><input id="cal-month" type="month" onchange="render()"></div><button class="btn-secondary" onclick="setCurrentMonth()">Deze maand</button></div></div><div class="info-box" style="margin-top:14px">Toont verlof, ziekte, overuren, feestdagen en vaste vrije dagen.</div><div style="margin-top:14px"><label>Vaste vrije dagen</label><div class="weekday-settings" id="fixedFreeDaysSettings"></div></div><div class="toolbar" style="margin-top:12px"><span class="tag ok">Verlof</span><span class="tag bad">Ziek</span><span class="tag info">Overuren</span><span class="tag purple">Feestdag</span><span class="tag">Vrije dag</span></div><div id="calendar" style="margin-top:14px"></div></div></section>
+  <section class="panel" id="tab-saldo-uitleg"><div class="grid two"><div class="card"><h2>Saldo-uitleg per medewerker</h2><div><label>Medewerker</label><select id="explainEmployee" onchange="render()"></select></div><div id="balanceExplanation" style="margin-top:14px"></div></div><div class="card"><h2>Controleerbare saldi</h2><div class="info-box">Deze v8 toont startwaarden, goedgekeurde uren, correcties en huidig saldo. Daardoor kun je later uitleggen waar elk getal vandaan komt.</div></div></div></section>
+  <section class="panel" id="tab-controles"><div class="grid two"><div class="card"><h2>Waarschuwingen</h2><div id="warningsList"></div></div><div class="card"><h2>Controlepunten</h2><div id="checkList"></div></div></div></section>
+  <section class="panel" id="tab-jaaroverzicht"><div class="grid two"><div class="card"><h2>Jaaroverzicht per medewerker</h2><div id="yearEmployeeTable"></div></div><div class="card"><h2>Jaar samenvatting</h2><div id="yearSummary" class="list"></div><div class="toolbar" style="margin-top:14px"><button onclick="downloadYearSummary()">Jaaroverzicht TXT</button><button class="btn-secondary" onclick="copyYearSummary()">Kopieer samenvatting</button></div></div></div></section>
+  <section class="panel" id="tab-medewerker-export"><div class="grid two"><div class="card"><h2>Individuele medewerkerexport</h2><div class="form"><div><label>Medewerker</label><select id="exportEmployee" onchange="render()"></select></div><div><label>E-mailadres</label><input id="exportEmail" type="email"></div><div class="full"><label>Tekst voor medewerker</label><textarea id="employeeExportPreview" readonly></textarea></div><div class="full toolbar"><button onclick="copyEmployeeExport()">Tekst kopiëren</button><button class="btn-secondary" onclick="downloadEmployeeExportTXT()">TXT export</button><button class="btn-secondary" onclick="downloadEmployeeExportCSV()">CSV export</button><button class="btn-soft" onclick="openEmployeeMail()">Mailconcept openen</button></div></div></div><div class="card"><h2>Samenvatting</h2><div id="employeeExportSummary" class="list"></div></div></div></section>
+  <section class="panel" id="tab-auditlog"><div class="card"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><h2 style="margin:0">Auditlog</h2><div class="toolbar"><button class="btn-secondary" onclick="downloadAuditCSV()">Auditlog CSV</button><button class="btn-gray" onclick="render()">Vernieuwen</button></div></div><div id="auditTable" style="margin-top:12px"></div></div></section>
+  <section class="panel" id="tab-backup"><div class="grid two"><div class="card"><h2>Export en reservekopie</h2><div class="toolbar"><button onclick="downloadJSON()">JSON reservekopie downloaden</button><button class="btn-secondary" onclick="downloadCSV()">CSV export</button><button class="btn-secondary" onclick="downloadAuditCSV()">Auditlog CSV</button></div><div id="backupStatus" class="status-box" style="margin-top:12px"></div><div class="notice" style="margin-top:14px">Een download is een losse kopie. De centrale waarheid blijft het gekozen OneDrive/SharePoint JSON-bestand.</div></div><div class="card"><h2>Import losse JSON</h2><label class="btn-secondary" style="display:inline-flex;align-items:center;padding:12px 16px;border-radius:12px;color:#fff;cursor:pointer">JSON importeren<input type="file" id="jsonFile" accept=".json" style="display:none" onchange="importJSON(event)"></label><div class="small" style="margin-top:12px">Import laadt data in de huidige sessie. Sla daarna zelf op naar het centrale bestand.</div></div></div><div class="grid two" style="margin-top:16px"><div class="card"><h2>Ruwe data medewerkers</h2><textarea id="rawEmployees" readonly></textarea></div><div class="card"><h2>Ruwe data registraties</h2><textarea id="rawRecords" readonly></textarea></div></div></section>
+</div>
+
+<script>
+const APP_VERSION='v8';
+const SCHEMA_VERSION=3;
+const MANAGER_KEY='verlof_dashboard_v8_manager_name';
+let data=null;
+let centralFileHandle=null;
+let currentSessionId='S-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
+let hasUnsavedChanges=false;
+
+function nowIso(){return new Date().toISOString()}
+function today(){return new Date().toISOString().slice(0,10)}
+function uid(p='VR'){return p+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)}
+function num(v){return Number.parseFloat(v||0)||0}
+function fmtHours(v){const n=Math.round(num(v)*100)/100;return n.toLocaleString('nl-NL',{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2})+' uur'}
+function shortDate(d){if(!d)return'';const x=new Date(d+'T12:00:00');return isNaN(x)?d:x.toLocaleDateString('nl-NL',{day:'2-digit',month:'2-digit',year:'numeric'})}
+function monthKey(d){const x=new Date(d+'T12:00:00');return isNaN(x)?'':x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')}
+function monthLabel(k){if(!k)return'';const[y,m]=k.split('-');return new Date(+y,+m-1,1).toLocaleDateString('nl-NL',{month:'short',year:'numeric'})}
+function html(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function dateInRange(t,s,e){const x=new Date(t+'T12:00:00'),a=new Date(s+'T00:00:00'),b=new Date((e||s)+'T23:59:59');return x>=a&&x<=b}
+function manager(){return document.getElementById('managerName').value.trim()||'Onbekende leidinggevende'}
+function rememberManager(){localStorage.setItem(MANAGER_KEY,manager())}
+
+function emptyData(){
+  return{
+    appVersion:APP_VERSION,
+    schemaVersion:SCHEMA_VERSION,
+    revision:0,
+    loadedRevision:0,
+    createdAt:nowIso(),
+    updatedAt:nowIso(),
+    updatedBy:'',
+    employees:[],
+    records:[],
+    settings:{fixedFreeDays:[0,6]},
+    auditLog:[],
+    lock:null,
+    backup:{lastJsonDownload:null,lastImport:null,lastCentralSave:null,lastCentralLoad:null,fileName:null}
+  }
+}
+
+function normalizeData(d){
+  const base=emptyData();
+  d=d&&typeof d==='object'?d:{};
+  const out={...base,...d};
+  out.appVersion=APP_VERSION;
+  out.schemaVersion=SCHEMA_VERSION;
+  out.revision=Number.isFinite(+d.revision)?+d.revision:0;
+  out.loadedRevision=out.revision;
+  out.settings={...base.settings,...(d.settings||{})};
+  out.backup={...base.backup,...(d.backup||{})};
+  out.employees=Array.isArray(d.employees)?d.employees:[];
+  out.records=Array.isArray(d.records)?d.records:[];
+  out.auditLog=Array.isArray(d.auditLog)?d.auditLog:[];
+  out.lock=d.lock||null;
+  return out
+}
+
+function requireData(){
+  if(!data){
+    alert('Open eerst het centrale JSON-bestand via Start & opslag.');
+    showTab('start');
+    return false
+  }
+  return true
+}
+
+function markDirty(){hasUnsavedChanges=true;renderStatus()}
+
+function addAudit(action,details,employeeId='',recordId='',before=null,after=null){
+  if(!data)return;
+  data.auditLog.unshift({id:uid('AUD'),at:nowIso(),by:manager(),action,details,employeeId,recordId,before,after});
+  data.auditLog=data.auditLog.slice(0,1500);
+  data.updatedAt=nowIso();
+  data.updatedBy=manager();
+  markDirty()
+}
+
+function renderStatus(){
+  const el=document.getElementById('dataStatus');
+  if(!data){el.value='Geen data geladen';return}
+  el.value=`${data.backup.fileName||'Bestand geladen'} • revisie ${data.revision}${hasUnsavedChanges?' • niet opgeslagen':''}`
+}
+
+function lockIsActive(lock){
+  if(!lock||!lock.at)return false;
+  return Date.now()-new Date(lock.at).getTime()<2*60*60*1000
+}
+
+async function openCentralFile(){
+  const name=manager();
+  if(!name||name==='Onbekende leidinggevende')return alert('Vul eerst je naam als leidinggevende in.');
+  rememberManager();
+  if(!window.showOpenFilePicker)return alert('Gebruik Chrome of Edge. Safari ondersteunt deze veilige bestandskoppeling meestal niet.');
+  const[h]=await showOpenFilePicker({types:[{description:'JSON opslagbestand',accept:{'application/json':['.json']}}]});
+  centralFileHandle=h;
+  const file=await h.getFile();
+  const txt=await file.text();
+  let loaded=normalizeData(JSON.parse(txt));
+  if(lockIsActive(loaded.lock)&&loaded.lock.sessionId!==currentSessionId&&loaded.lock.by!==name){
+    const ok=confirm(`Let op: dit bestand lijkt in gebruik door ${loaded.lock.by} sinds ${new Date(loaded.lock.at).toLocaleString('nl-NL')}.\n\nWerk alleen verder als je zeker weet dat die persoon klaar is.`);
+    if(!ok)return
+  }
+  data=loaded;
+  data.backup.fileName=file.name;
+  data.backup.lastCentralLoad=nowIso();
+  data.lock={by:name,at:nowIso(),sessionId:currentSessionId};
+  addAudit('Bestand geopend',file.name);
+  await writeCentralFile({skipConflict:true});
+  hasUnsavedChanges=false;
+  showTab('dashboard');
+  render()
+}
+
+async function createCentralFile(){
+  const name=manager();
+  if(!name||name==='Onbekende leidinggevende')return alert('Vul eerst je naam als leidinggevende in.');
+  rememberManager();
+  if(!window.showSaveFilePicker)return alert('Gebruik Chrome of Edge.');
+  centralFileHandle=await showSaveFilePicker({suggestedName:`verlof_dashboard_centraal_${today()}.json`,types:[{description:'JSON opslagbestand',accept:{'application/json':['.json']}}]});
+  data=emptyData();
+  data.backup.fileName=centralFileHandle.name||'centraal opslagbestand';
+  data.lock={by:name,at:nowIso(),sessionId:currentSessionId};
+  addAudit('Centraal bestand aangemaakt',data.backup.fileName);
+  await writeCentralFile({skipConflict:true});
+  hasUnsavedChanges=false;
+  showTab('dashboard');
+  render()
+}
+
+async function readCentralRevision(){
+  if(!centralFileHandle)return null;
+  try{
+    const f=await centralFileHandle.getFile();
+    const t=await f.text();
+    return normalizeData(JSON.parse(t))
+  }catch(e){return null}
+}
+
+async function writeCentralFile(opts={}){
+  if(!data)return alert('Geen data geladen.');
+  if(!centralFileHandle)return alert('Kies eerst een centraal opslagbestand.');
+  if(!opts.skipConflict){
+    const current=await readCentralRevision();
+    if(current&&current.revision!==data.loadedRevision){
+      alert(`Opslaan geblokkeerd. Het centrale bestand is ondertussen gewijzigd.\n\nJouw geladen revisie: ${data.loadedRevision}\nActuele revisie: ${current.revision}\n\nHaal eerst opnieuw het centrale bestand op om overschrijven te voorkomen.`);
+      return false
+    }
+  }
+  data.revision=(data.revision||0)+1;
+  data.loadedRevision=data.revision;
+  data.updatedAt=nowIso();
+  data.updatedBy=manager();
+  data.backup.lastCentralSave=nowIso();
+  data.backup.fileName=centralFileHandle.name||data.backup.fileName;
+  const clean=JSON.parse(JSON.stringify(data));
+  delete clean.loadedRevision;
+  const writable=await centralFileHandle.createWritable();
+  await writable.write(JSON.stringify(clean,null,2));
+  await writable.close();
+  hasUnsavedChanges=false;
+  renderStatus();
+  return true
+}
+
+async function saveToCentralFile(){
+  if(!requireData())return;
+  rememberManager();
+  addAudit('Handmatig opgeslagen','Opslag naar centraal bestand gestart');
+  const ok=await writeCentralFile();
+  if(ok){alert('Opgeslagen naar het centrale JSON-bestand.');render()}
+}
+
+async function saveAndClose(){
+  if(!requireData())return;
+  if(!confirm('Opslaan en daarna alle lokale werkdata uit dit dashboard wissen?'))return;
+  data.lock=null;
+  addAudit('Veilig afgesloten','Data opgeslagen en lokale sessie gewist');
+  const ok=await writeCentralFile();
+  if(!ok)return;
+  data=null;
+  centralFileHandle=null;
+  hasUnsavedChanges=false;
+  resetSensitiveFields();
+  showTab('start');
+  render();
+  alert('Opgeslagen en veilig afgesloten. De personeelsdata is lokaal uit het dashboard gewist.')
+}
+
+function closeWithoutSaving(){
+  if(hasUnsavedChanges&&!confirm('Er zijn niet-opgeslagen wijzigingen. Toch lokaal wissen zonder opslaan?'))return;
+  data=null;
+  centralFileHandle=null;
+  hasUnsavedChanges=false;
+  resetSensitiveFields();
+  showTab('start');
+  render()
+}
+
+function resetSensitiveFields(){
+  ['rawEmployees','rawRecords','employeeExportPreview'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''})
+}
+
+function employeeName(id,d=data){return(d?.employees||[]).find(e=>e.id===id)?.name||'Onbekend'}
+function activeEmployees(d=data){return(d?.employees||[]).filter(e=>e.status!=='Uit dienst')}
+function statusTag(s){if(s==='Goedgekeurd'||s==='Geregistreerd')return`<span class="tag ok">${html(s)}</span>`;if(s==='Afgewezen')return`<span class="tag bad">${html(s)}</span>`;return`<span class="tag info">${html(s||'')}</span>`}
+function typeClass(t){if(t.includes('Verlof'))return'cal-verlof';if(t.includes('Ziek')||t.includes('Hersteld'))return'cal-ziek';if(t.includes('Overuren'))return'cal-overuren';return''}
+
+function calculate(d=data){
+  const byEmp={};
+  (d?.employees||[]).forEach(e=>byEmp[e.id]={employee:e,startLeave:num(e.startLeaveHours),startOvertime:num(e.startOvertimeHours),leaveUsed:0,leaveCorrections:0,overtimeBuilt:0,overtimeTaken:0,overtimeCorrections:0,openLeave:0,sick:false,sickSince:null,sicknessEvents:0});
+  [...(d?.records||[])].sort((a,b)=>(a.startDate||'').localeCompare(b.startDate||'')||(a.createdAt||'').localeCompare(b.createdAt||'')).forEach(r=>{
+    const b=byEmp[r.employeeId];if(!b)return;const h=num(r.hours);
+    if(r.type==='Verlof aanvraag'&&r.status==='Aangevraagd')b.openLeave+=h;
+    if(r.type==='Verlof goedgekeurd'&&(r.status==='Goedgekeurd'||r.status==='Geregistreerd'))b.leaveUsed+=h;
+    if(r.type==='Correctie verlof')b.leaveCorrections+=h;
+    if(r.type==='Overuren opgebouwd')b.overtimeBuilt+=h;
+    if(r.type==='Overuren opgenomen')b.overtimeTaken+=h;
+    if(r.type==='Correctie overuren')b.overtimeCorrections+=h;
+    if(r.type==='Ziekmelding'){b.sick=true;b.sickSince=r.startDate;b.sicknessEvents++}
+    if(r.type==='Hersteldmelding'){b.sick=false;b.sickSince=null;b.sicknessEvents++}
+  });
+  Object.values(byEmp).forEach(b=>{b.leaveBalance=b.startLeave-b.leaveUsed+b.leaveCorrections;b.overtimeBalance=b.startOvertime+b.overtimeBuilt-b.overtimeTaken+b.overtimeCorrections});
+  return{byEmp,employees:d?.employees||[],records:d?.records||[]}
+}
+
+function validateRecord(record,d=data){
+  const errors=[],warnings=[];
+  const emp=d.employees.find(e=>e.id===record.employeeId);
+  if(!emp)errors.push('Kies een medewerker.');
+  if(emp&&emp.status==='Uit dienst')errors.push('Deze medewerker staat op Uit dienst.');
+  if(!record.startDate)errors.push('Vul een startdatum in.');
+  if(record.endDate&&record.startDate&&record.endDate<record.startDate)errors.push('Einddatum mag niet vóór startdatum liggen.');
+  if(record.type.includes('Correctie')){
+    if(num(record.hours)===0)errors.push('Correctie mag niet 0 uur zijn.');
+    if(!record.note.trim())errors.push('Geef bij een correctie altijd een reden/opmerking.')
+  }else if(num(record.hours)<=0)errors.push('Vul een positief aantal uren in.');
+  const calc=calculate(d),b=calc.byEmp[record.employeeId];
+  if(record.type==='Verlof goedgekeurd'&&b&&(b.leaveBalance-num(record.hours)<0))warnings.push(`Let op: verlofsaldo wordt negatief (${fmtHours(b.leaveBalance-num(record.hours))}).`);
+  if(record.type==='Ziekmelding'&&b&&b.sick)warnings.push('Deze medewerker heeft al een open ziekmelding.');
+  if(record.type==='Hersteldmelding'&&b&&!b.sick)warnings.push('Er is geen open ziekmelding gevonden voor deze medewerker.');
+  const medWords=['diagnose','klacht','klachten','griep','burn-out','burnout','depressie','operatie','corona','migraine','ziektebeeld'];
+  if((record.type==='Ziekmelding'||record.type==='Hersteldmelding')&&medWords.some(w=>record.note.toLowerCase().includes(w)))warnings.push('Privacy: je opmerking lijkt medische details te bevatten. Bewaar liever alleen zakelijke informatie.');
+  return{errors,warnings}
+}
+
+function saveEmployeeForm(){
+  if(!requireData())return;
+  const id=document.getElementById('e-edit-id').value;
+  const name=document.getElementById('e-name').value.trim();
+  if(!name)return alert('Vul een naam in.');
+  const item={id:id||uid('EMP'),name,email:document.getElementById('e-email').value.trim(),role:document.getElementById('e-role').value.trim(),contractHours:num(document.getElementById('e-contract').value),startLeaveHours:num(document.getElementById('e-leave').value),startOvertimeHours:num(document.getElementById('e-overtime').value),status:document.getElementById('e-status').value,updatedAt:nowIso()};
+  if(id){
+    const i=data.employees.findIndex(e=>e.id===id),before=data.employees[i];
+    item.createdAt=before.createdAt||nowIso();
+    data.employees[i]=item;
+    addAudit('Medewerker aangepast',name,id,'',before,item)
+  }else{
+    item.createdAt=nowIso();
+    data.employees.push(item);
+    addAudit('Medewerker toegevoegd',name,item.id,'',null,item)
+  }
+  cancelEmployeeEdit(false);
+  render()
+}
+
+function editEmployee(id){
+  if(!requireData())return;
+  const e=data.employees.find(x=>x.id===id);if(!e)return;
+  document.getElementById('e-edit-id').value=e.id;
+  document.getElementById('e-name').value=e.name||'';
+  document.getElementById('e-email').value=e.email||'';
+  document.getElementById('e-role').value=e.role||'';
+  document.getElementById('e-contract').value=e.contractHours||40;
+  document.getElementById('e-leave').value=e.startLeaveHours||0;
+  document.getElementById('e-overtime').value=e.startOvertimeHours||0;
+  document.getElementById('e-status').value=e.status||'Actief';
+  document.getElementById('employeeEditNotice').style.display='block';
+  document.getElementById('employeeCancelBtn').style.display='inline-block';
+  document.getElementById('employeeSaveBtn').textContent='Wijzigingen opslaan';
+  showTab('medewerkers')
+}
+
+function cancelEmployeeEdit(doRender=true){
+  ['e-edit-id','e-name','e-email','e-role'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('e-contract').value=40;
+  document.getElementById('e-leave').value=200;
+  document.getElementById('e-overtime').value=0;
+  document.getElementById('e-status').value='Actief';
+  document.getElementById('employeeEditNotice').style.display='none';
+  document.getElementById('employeeCancelBtn').style.display='none';
+  document.getElementById('employeeSaveBtn').textContent='Medewerker opslaan';
+  if(doRender)render()
+}
+
+function loadDefaultEmployees(){
+  if(!requireData())return;
+  if(!confirm('Voorbeeldmedewerkers toevoegen?'))return;
+  ['Sanne Kamps','Jeroen Bakker','Fatima El Amrani','Lars de Vries','Kim Jansen','Noah Smit','Eva Bos','Mila Visser','Daan Peters','Sara Meijer'].forEach((n,i)=>data.employees.push({id:uid('EMP'),name:n,email:'',role:i<5?'Team A':'Team B',contractHours:40,startLeaveHours:200,startOvertimeHours:0,status:'Actief',createdAt:nowIso(),updatedAt:nowIso()}));
+  addAudit('Voorbeeldmedewerkers geladen','10 voorbeeldmedewerkers toegevoegd');
+  render()
+}
+
+function prefillByType(){
+  const t=document.getElementById('r-type').value,s=document.getElementById('r-status'),c=document.getElementById('r-category'),m=document.getElementById('r-manager');
+  m.value=manager();
+  if(t==='Verlof aanvraag'){s.value='Aangevraagd';c.value='Vakantie'}
+  if(t==='Verlof goedgekeurd'){s.value='Goedgekeurd';c.value='Vakantie'}
+  if(t==='Verlof afgewezen'){s.value='Afgewezen';c.value='Vakantie'}
+  if(t.includes('Overuren')){s.value='Geregistreerd';c.value='Overuren'}
+  if(t.includes('Ziek')||t.includes('Hersteld')){s.value='Geregistreerd';c.value='Ziek'}
+  if(t.includes('Correctie')){s.value='Geregistreerd';c.value='Correctie'}
+}
+
+function addRecord(){
+  if(!requireData())return;
+  const r={id:uid('REC'),employeeId:document.getElementById('r-employee').value,type:document.getElementById('r-type').value,startDate:document.getElementById('r-start').value,endDate:document.getElementById('r-end').value,hours:num(document.getElementById('r-hours').value),status:document.getElementById('r-status').value,category:document.getElementById('r-category').value,manager:document.getElementById('r-manager').value.trim()||manager(),note:document.getElementById('r-note').value.trim(),createdAt:nowIso(),updatedAt:nowIso()};
+  const v=validateRecord(r,data);
+  if(v.errors.length)return alert(v.errors.join('\n'));
+  if(v.warnings.length&&!confirm(v.warnings.join('\n')+'\n\nToch opslaan?'))return;
+  data.records.push(r);
+  addAudit('Registratie toegevoegd',`${r.type} - ${employeeName(r.employeeId)} - ${fmtHours(r.hours)}`,r.employeeId,r.id,null,r);
+  ['r-hours','r-note'].forEach(id=>document.getElementById(id).value='');
+  render()
+}
+
+function deleteRecord(id){
+  if(!requireData())return;
+  const r=data.records.find(x=>x.id===id);
+  if(!r||!confirm('Deze registratie verwijderen? Dit komt in de auditlog.'))return;
+  data.records=data.records.filter(x=>x.id!==id);
+  addAudit('Registratie verwijderd',`${r.type} - ${employeeName(r.employeeId)}`,r.employeeId,r.id,r,null);
+  render()
+}
+
+function approveRecord(id){
+  const r=data.records.find(x=>x.id===id);if(!r)return;
+  const before={...r};
+  r.type='Verlof goedgekeurd';r.status='Goedgekeurd';r.updatedAt=nowIso();
+  addAudit('Aanvraag goedgekeurd',employeeName(r.employeeId),r.employeeId,r.id,before,r);
+  render()
+}
+
+function rejectRecord(id){
+  const r=data.records.find(x=>x.id===id);if(!r)return;
+  const before={...r};
+  r.type='Verlof afgewezen';r.status='Afgewezen';r.updatedAt=nowIso();
+  addAudit('Aanvraag afgewezen',employeeName(r.employeeId),r.employeeId,r.id,before,r);
+  render()
+}
+
+function showTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='tab-'+name));
+  render()
+}
+document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+
+function updateSelects(){
+  if(!data)return;
+  const opts='<option value="">Alles</option>'+data.employees.map(e=>`<option value="${e.id}">${html(e.name)}${e.status==='Uit dienst'?' (uit dienst)':''}</option>`).join('');
+  const active=activeEmployees().map(e=>`<option value="${e.id}">${html(e.name)}</option>`).join('');
+  ['r-employee'].forEach(id=>{const el=document.getElementById(id),v=el.value;el.innerHTML=active;el.value=v&&[...el.options].some(o=>o.value===v)?v:el.options[0]?.value||''});
+  ['filterLeaveEmployee','explainEmployee','exportEmployee'].forEach(id=>{const el=document.getElementById(id),v=el.value;el.innerHTML=opts;el.value=v&&[...el.options].some(o=>o.value===v)?v:''})
+}
+
+function table(headers,rows){
+  if(!rows.length)return'<div class="empty">Geen gegevens.</div>';
+  return`<div class="table-wrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`
+}
+
+function render(){
+  document.getElementById('managerName').value=document.getElementById('managerName').value||localStorage.getItem(MANAGER_KEY)||'';
+  renderStatus();
+  document.getElementById('dashboardContent').style.display=data?'block':'none';
+  document.getElementById('lockedDashboard').style.display=data?'none':'block';
+  if(!data){
+    document.getElementById('heroOpen').textContent='-';
+    document.getElementById('heroSick').textContent='-';
+    document.getElementById('lockWarning').innerHTML='';
+    return
+  }
+  updateSelects();
+  renderFixedFreeDays();
+  const calc=calculate();
+  const vals=Object.values(calc.byEmp);
+  const open=data.records.filter(r=>r.type==='Verlof aanvraag'&&r.status==='Aangevraagd').length;
+  const sick=vals.filter(b=>b.sick).length;
+  document.getElementById('heroOpen').textContent=open;
+  document.getElementById('heroSick').textContent=sick;
+  document.getElementById('kpis').innerHTML=[['Medewerkers',activeEmployees().length,'blue'],['Open aanvragen',open,'orange'],['Ziek vandaag',sick,'red'],['Registraties',data.records.length,'purple']].map(k=>`<div class="card"><div class="kpi-title">${k[0]}</div><div class="kpi-value ${k[2]}">${k[1]}</div></div>`).join('');
+  document.getElementById('quickStatus').innerHTML=`<div class="row"><div class="muted">Versie</div><strong>${APP_VERSION}</strong></div><div class="row"><div class="muted">Revisie</div><strong>${data.revision}</strong></div><div class="row"><div class="muted">Laatst gewijzigd door</div><strong>${html(data.updatedBy||'-')}</strong></div><div class="row"><div class="muted">Niet opgeslagen?</div><strong>${hasUnsavedChanges?'Ja':'Nee'}</strong></div>`;
+  renderBackup();
+  renderEmployees(calc);
+  renderRecords(calc);
+  renderCalendar();
+  renderWarnings(calc);
+  renderYear(calc);
+  renderBalanceExplanation(calc);
+  renderEmployeeExport(calc);
+  renderAudit();
+  document.getElementById('rawEmployees').value=JSON.stringify(data.employees,null,2);
+  document.getElementById('rawRecords').value=JSON.stringify(data.records,null,2)
+}
+
+function renderBackup(){
+  const b=data.backup||{};
+  const row=(k,v)=>`<div class="row"><div class="muted">${k}</div><strong>${v||'Nog niet'}</strong></div>`;
+  const rows=row('Bestand',b.fileName)+row('Revisie',data.revision)+row('Laatst geladen',b.lastCentralLoad?new Date(b.lastCentralLoad).toLocaleString('nl-NL'):null)+row('Laatst opgeslagen',b.lastCentralSave?new Date(b.lastCentralSave).toLocaleString('nl-NL'):null)+row('Lock',data.lock?`${data.lock.by} sinds ${new Date(data.lock.at).toLocaleString('nl-NL')}`:'Geen');
+  document.getElementById('backupMini').innerHTML=rows;
+  document.getElementById('backupStatus').innerHTML=rows;
+  document.getElementById('lockWarning').innerHTML=data.lock?`<div class="info-box"><strong>In gebruik door:</strong> ${html(data.lock.by)} • sessie ${html(data.lock.sessionId||'')}</div>`:''
+}
+
+function renderEmployees(calc){
+  document.getElementById('employeeCards').innerHTML=data.employees.map(e=>`<div class="employee-card"><div class="employee-main"><div class="avatar">${html((e.name||'?').slice(0,1))}</div><div><div style="font-weight:900">${html(e.name)}</div><div class="small">${html(e.role||'Geen functie')} • ${fmtHours(e.contractHours)}/week • ${html(e.status||'Actief')}</div></div></div><div class="toolbar"><button class="btn-gray" onclick="editEmployee('${e.id}')">Bewerken</button></div></div>`).join('')||'<div class="empty">Nog geen medewerkers.</div>';
+  const rows=data.employees.map(e=>{const b=calc.byEmp[e.id];return`<tr><td>${html(e.name)}</td><td>${html(e.status||'Actief')}</td><td>${fmtHours(b.leaveBalance)}</td><td>${fmtHours(b.overtimeBalance)}</td><td>${b.sick?'<span class="tag bad">Ziek</span>':'<span class="tag ok">Niet ziek</span>'}</td></tr>`});
+  document.getElementById('employeeBalanceTable').innerHTML=table(['Medewerker','Status','Verlof saldo','Overuren saldo','Ziekte'],rows)
+}
+
+function recordRows(records,actions=true){
+  return records.map(r=>`<tr><td>${shortDate(r.startDate)}${r.endDate&&r.endDate!==r.startDate?' t/m '+shortDate(r.endDate):''}</td><td>${html(employeeName(r.employeeId))}</td><td>${html(r.type)}</td><td>${statusTag(r.status)}</td><td>${fmtHours(r.hours)}</td><td>${html(r.category||'')}<div class="small">${html(r.note||'')}</div></td>${actions?`<td class="toolbar">${r.type==='Verlof aanvraag'&&r.status==='Aangevraagd'?`<button class="btn-secondary" onclick="approveRecord('${r.id}')">Akkoord</button><button class="btn-gray" onclick="rejectRecord('${r.id}')">Afwijzen</button>`:''}<button class="btn-danger" onclick="deleteRecord('${r.id}')">Verwijder</button></td>`:''}</tr>`)
+}
+
+function renderRecords(calc){
+  const recent=[...data.records].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,10);
+  document.getElementById('recentTable').innerHTML=table(['Datum','Medewerker','Soort','Status','Uren','Info','Actie'],recordRows(recent));
+  let leave=data.records.filter(r=>r.type.includes('Verlof'));
+  const emp=document.getElementById('filterLeaveEmployee').value,st=document.getElementById('filterLeaveStatus').value,txt=document.getElementById('filterLeaveText').value.toLowerCase();
+  if(emp)leave=leave.filter(r=>r.employeeId===emp);
+  if(st&&st!=='Alles')leave=leave.filter(r=>r.status===st);
+  if(txt)leave=leave.filter(r=>(employeeName(r.employeeId)+' '+r.type+' '+r.category+' '+r.manager+' '+r.note).toLowerCase().includes(txt));
+  document.getElementById('leaveTable').innerHTML=table(['Datum','Medewerker','Soort','Status','Uren','Info','Actie'],recordRows(leave));
+  const over=data.records.filter(r=>r.type.includes('Overuren')||r.type.includes('Correctie overuren'));
+  document.getElementById('overtimeTable').innerHTML=table(['Datum','Medewerker','Soort','Status','Uren','Info','Actie'],recordRows(over));
+  document.getElementById('overtimeBalances').innerHTML=Object.values(calc.byEmp).map(b=>`<div class="row"><div>${html(b.employee.name)}</div><strong>${fmtHours(b.overtimeBalance)}</strong></div>`).join('')||'<div class="empty">Geen medewerkers.</div>';
+  const sick=data.records.filter(r=>r.type.includes('Ziek')||r.type.includes('Hersteld'));
+  document.getElementById('sicknessTable').innerHTML=table(['Datum','Medewerker','Soort','Status','Uren','Info','Actie'],recordRows(sick));
+  document.getElementById('sicknessStatus').innerHTML=Object.values(calc.byEmp).filter(b=>b.sick).map(b=>`<div class="row"><div>${html(b.employee.name)}<div class="small">Sinds ${shortDate(b.sickSince)}</div></div><span class="tag bad">Open</span></div>`).join('')||'<div class="empty">Niemand ziek vandaag.</div>';
+  const months={};
+  data.records.filter(r=>r.type==='Verlof goedgekeurd').forEach(r=>{const k=monthKey(r.startDate);months[k]=(months[k]||0)+num(r.hours)});
+  const max=Math.max(1,...Object.values(months));
+  document.getElementById('monthlyBars').innerHTML=Object.keys(months).sort().slice(-12).map(k=>`<div class="bar-row"><div>${monthLabel(k)}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(months[k]/max*100)}%"></div></div><strong>${fmtHours(months[k])}</strong></div>`).join('')||'<div class="empty">Nog geen goedgekeurd verlof.</div>';
+  document.getElementById('managerActions').innerHTML=(openActionRows(calc).join('')||'<div class="empty">Geen directe acties.</div>')
+}
+
+function openActionRows(calc){
+  const out=[];
+  data.records.filter(r=>r.type==='Verlof aanvraag'&&r.status==='Aangevraagd').forEach(r=>out.push(`<div class="row"><div>${html(employeeName(r.employeeId))}<div class="small">Verlofaanvraag ${shortDate(r.startDate)} • ${fmtHours(r.hours)}</div></div><span class="tag info">Beoordelen</span></div>`));
+  Object.values(calc.byEmp).filter(b=>b.leaveBalance<0).forEach(b=>out.push(`<div class="row"><div>${html(b.employee.name)}<div class="small">Verlofsaldo negatief</div></div><span class="tag bad">${fmtHours(b.leaveBalance)}</span></div>`));
+  return out
+}
+
+function renderFixedFreeDays(){
+  const names=['Zo','Ma','Di','Wo','Do','Vr','Za'];
+  document.getElementById('fixedFreeDaysSettings').innerHTML=names.map((n,i)=>`<label><input type="checkbox" ${data.settings.fixedFreeDays.includes(i)?'checked':''} onchange="toggleFreeDay(${i},this.checked)">${n}</label>`).join('')
+}
+function toggleFreeDay(i,on){
+  if(!requireData())return;
+  data.settings.fixedFreeDays=data.settings.fixedFreeDays.filter(x=>x!==i);
+  if(on)data.settings.fixedFreeDays.push(i);
+  addAudit('Instelling aangepast','Vaste vrije dagen gewijzigd');
+  render()
+}
+function setCurrentMonth(){document.getElementById('cal-month').value=today().slice(0,7);render()}
+
+function easterDate(y){
+  const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;
+  return new Date(y,mo-1,da)
+}
+function addDays(dt,n){const d=new Date(dt);d.setDate(d.getDate()+n);return d}
+function iso(dt){return dt.toISOString().slice(0,10)}
+function holidays(y){
+  const e=easterDate(y),h={};
+  h[`${y}-01-01`]='Nieuwjaarsdag';h[`${y}-04-27`]='Koningsdag';h[`${y}-05-05`]='Bevrijdingsdag';h[`${y}-12-25`]='1e kerstdag';h[`${y}-12-26`]='2e kerstdag';
+  h[iso(addDays(e,-2))]='Goede Vrijdag';h[iso(addDays(e,1))]='2e paasdag';h[iso(addDays(e,39))]='Hemelvaart';h[iso(addDays(e,50))]='2e pinksterdag';
+  return h
+}
+
+function renderCalendar(){
+  let val=document.getElementById('cal-month').value;
+  if(!val){val=today().slice(0,7);document.getElementById('cal-month').value=val}
+  const[y,m]=val.split('-').map(Number),days=new Date(y,m,0).getDate(),hol=holidays(y),names=['zo','ma','di','wo','do','vr','za'];
+  let out='<div class="calendar-grid">';
+  for(let day=1;day<=days;day++){
+    const date=`${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`,dt=new Date(date+'T12:00:00'),free=data.settings.fixedFreeDays.includes(dt.getDay()),holiday=hol[date],items=[];
+    if(holiday)items.push(`<div class="cal-item cal-feestdag">${holiday}</div>`);
+    if(free)items.push(`<div class="cal-item cal-vrij">Vaste vrije dag</div>`);
+    data.records.forEach(r=>{if(r.startDate&&dateInRange(date,r.startDate,r.endDate||r.startDate))items.push(`<div class="cal-item ${typeClass(r.type)}">${html(employeeName(r.employeeId))}: ${html(r.type)}</div>`)});
+    out+=`<div class="cal-day ${free?'free-day':''} ${holiday?'holiday-day':''} ${date===today()?'today-day':''}"><div class="cal-head"><div class="cal-date">${day}</div><div class="cal-weekday">${names[dt.getDay()]}</div></div>${items.join('')}</div>`
+  }
+  document.getElementById('calendar').innerHTML=out+'</div>'
+}
+
+function renderWarnings(calc){
+  const warnings=[];
+  Object.values(calc.byEmp).forEach(b=>{
+    if(b.leaveBalance<0)warnings.push(['Negatief verlofsaldo',b.employee.name,fmtHours(b.leaveBalance),'bad']);
+    if(b.overtimeBalance<0)warnings.push(['Negatief overurensaldo',b.employee.name,fmtHours(b.overtimeBalance),'warn'])
+  });
+  data.records.forEach(r=>{const v=validateRecord(r,data);v.errors.concat(v.warnings).forEach(w=>warnings.push(['Registratiecontrole',employeeName(r.employeeId),w,'warn']))});
+  document.getElementById('warningsList').innerHTML=warnings.map(w=>`<div class="row"><div><strong>${html(w[0])}</strong><div class="small">${html(w[1])} • ${html(w[2])}</div></div><span class="tag ${w[3]}">Check</span></div>`).join('')||'<div class="empty">Geen waarschuwingen.</div>';
+  document.getElementById('checkList').innerHTML=`<div class="row"><div>Privacy-modus</div><span class="tag ok">Geen personeelsdata in localStorage</span></div><div class="row"><div>Data schema</div><span class="tag ok">${APP_VERSION} / schema ${SCHEMA_VERSION}</span></div><div class="row"><div>Revisiecontrole</div><span class="tag ok">Revisie ${data.revision}</span></div><div class="row"><div>Auditlog actief</div><span class="tag ok">${data.auditLog.length} regels</span></div>`
+}
+
+function renderBalanceExplanation(calc){
+  let id=document.getElementById('explainEmployee').value;
+  if(!id&&data.employees[0]){id=data.employees[0].id;document.getElementById('explainEmployee').value=id}
+  const b=calc.byEmp[id];
+  document.getElementById('balanceExplanation').innerHTML=b?`<div class="list"><div class="row"><div>Startsaldo verlof</div><strong>${fmtHours(b.startLeave)}</strong></div><div class="row"><div>Goedgekeurd verlof</div><strong>-${fmtHours(b.leaveUsed)}</strong></div><div class="row"><div>Correcties verlof</div><strong>${fmtHours(b.leaveCorrections)}</strong></div><div class="row"><div><strong>Huidig verlofsaldo</strong></div><strong>${fmtHours(b.leaveBalance)}</strong></div><div class="row"><div>Startsaldo overuren</div><strong>${fmtHours(b.startOvertime)}</strong></div><div class="row"><div>Overuren opgebouwd</div><strong>${fmtHours(b.overtimeBuilt)}</strong></div><div class="row"><div>Overuren opgenomen</div><strong>-${fmtHours(b.overtimeTaken)}</strong></div><div class="row"><div>Correcties overuren</div><strong>${fmtHours(b.overtimeCorrections)}</strong></div><div class="row"><div><strong>Huidig overurensaldo</strong></div><strong>${fmtHours(b.overtimeBalance)}</strong></div></div>`:'<div class="empty">Kies een medewerker.</div>'
+}
+
+function renderYear(calc){
+  const y=new Date().getFullYear();
+  const rows=data.employees.map(e=>{
+    const rs=data.records.filter(r=>r.employeeId===e.id&&String(r.startDate||'').startsWith(String(y)));
+    const leave=rs.filter(r=>r.type==='Verlof goedgekeurd').reduce((s,r)=>s+num(r.hours),0),over=rs.filter(r=>r.type==='Overuren opgebouwd').reduce((s,r)=>s+num(r.hours),0),sick=rs.filter(r=>r.type==='Ziekmelding').length,b=calc.byEmp[e.id];
+    return`<tr><td>${html(e.name)}</td><td>${fmtHours(leave)}</td><td>${fmtHours(over)}</td><td>${sick}</td><td>${fmtHours(b.leaveBalance)}</td><td>${fmtHours(b.overtimeBalance)}</td></tr>`
+  });
+  document.getElementById('yearEmployeeTable').innerHTML=table(['Medewerker','Verlof dit jaar','Overuren opgebouwd','Ziekmeldingen','Verlofsaldo','Overurensaldo'],rows);
+  document.getElementById('yearSummary').innerHTML=`<div class="row"><div>Jaar</div><strong>${y}</strong></div><div class="row"><div>Totaal registraties</div><strong>${data.records.length}</strong></div><div class="row"><div>Open aanvragen</div><strong>${data.records.filter(r=>r.type==='Verlof aanvraag'&&r.status==='Aangevraagd').length}</strong></div>`
+}
+
+function employeeExportText(calc){
+  let id=document.getElementById('exportEmployee').value;
+  if(!id&&data.employees[0])id=data.employees[0].id;
+  const e=data.employees.find(x=>x.id===id),b=calc.byEmp[id];
+  if(!e||!b)return'';
+  return`Beste ${e.name},\n\nHierbij je actuele overzicht uit de verlof-, overuren- en ziekteregistratie.\n\nVerlof:\n- Startsaldo: ${fmtHours(b.startLeave)}\n- Goedgekeurd verlof: ${fmtHours(b.leaveUsed)}\n- Correcties: ${fmtHours(b.leaveCorrections)}\n- Huidig verlofsaldo: ${fmtHours(b.leaveBalance)}\n\nOveruren:\n- Startsaldo: ${fmtHours(b.startOvertime)}\n- Opgebouwd: ${fmtHours(b.overtimeBuilt)}\n- Opgenomen: ${fmtHours(b.overtimeTaken)}\n- Correcties: ${fmtHours(b.overtimeCorrections)}\n- Huidig overurensaldo: ${fmtHours(b.overtimeBalance)}\n\nControleer dit overzicht en laat het weten als je denkt dat er iets niet klopt.\n\nMet vriendelijke groet,`
+}
+
+function renderEmployeeExport(calc){
+  let id=document.getElementById('exportEmployee').value;
+  if(!id&&data.employees[0]){id=data.employees[0].id;document.getElementById('exportEmployee').value=id}
+  const e=data.employees.find(x=>x.id===id),b=calc.byEmp[id];
+  document.getElementById('employeeExportPreview').value=employeeExportText(calc);
+  document.getElementById('exportEmail').value=e?.email||'';
+  document.getElementById('employeeExportSummary').innerHTML=b?`<div class="row"><div>Medewerker</div><strong>${html(e.name)}</strong></div><div class="row"><div>Verlofsaldo</div><strong>${fmtHours(b.leaveBalance)}</strong></div><div class="row"><div>Overurensaldo</div><strong>${fmtHours(b.overtimeBalance)}</strong></div>`:'<div class="empty">Geen medewerker geselecteerd.</div>'
+}
+
+function renderAudit(){
+  const rows=data.auditLog.map(a=>`<tr><td>${new Date(a.at).toLocaleString('nl-NL')}</td><td>${html(a.by||'')}</td><td>${html(a.action)}</td><td>${html(a.details||'')}</td><td>${html(a.employeeId?employeeName(a.employeeId):'')}</td></tr>`);
+  document.getElementById('auditTable').innerHTML=table(['Moment','Door','Actie','Details','Medewerker'],rows)
+}
+
+function resetFilters(){document.getElementById('filterLeaveEmployee').value='';document.getElementById('filterLeaveStatus').value='Alles';document.getElementById('filterLeaveText').value='';render()}
+
+function toCSV(rows){return rows.map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(';')).join('\n')}
+function download(name,text,type='text/plain'){const blob=new Blob([text],{type}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href)}
+function downloadEmptyTemplate(){download(`verlof_dashboard_centraal_template_${today()}.json`,JSON.stringify(emptyData(),null,2),'application/json')}
+
+function downloadJSON(){
+  if(!requireData())return;
+  data.backup.lastJsonDownload=nowIso();
+  addAudit('JSON reservekopie gedownload','Losse reservekopie gemaakt');
+  download(`verlof_dashboard_reservekopie_${today()}.json`,JSON.stringify(data,null,2),'application/json');
+  render()
+}
+
+function downloadCSV(){
+  if(!requireData())return;
+  const rows=[['id','medewerker','type','start','eind','uren','status','categorie','manager','opmerking']].concat(data.records.map(r=>[r.id,employeeName(r.employeeId),r.type,r.startDate,r.endDate,r.hours,r.status,r.category,r.manager,r.note]));
+  download(`verlof_registraties_${today()}.csv`,toCSV(rows),'text/csv')
+}
+
+function downloadAuditCSV(){
+  if(!requireData())return;
+  const rows=[['moment','door','actie','details','medewerker']].concat(data.auditLog.map(a=>[a.at,a.by,a.action,a.details,employeeName(a.employeeId)]));
+  download(`auditlog_${today()}.csv`,toCSV(rows),'text/csv')
+}
+
+function downloadYearSummary(){if(!requireData())return;download(`jaaroverzicht_${today()}.txt`,document.getElementById('yearSummary').innerText+'\n\n'+document.getElementById('yearEmployeeTable').innerText)}
+function copyYearSummary(){navigator.clipboard.writeText(document.getElementById('yearSummary').innerText+'\n\n'+document.getElementById('yearEmployeeTable').innerText);alert('Jaaroverzicht gekopieerd.')}
+function copyEmployeeExport(){navigator.clipboard.writeText(document.getElementById('employeeExportPreview').value);alert('Tekst gekopieerd.')}
+function downloadEmployeeExportTXT(){download(`medewerker_export_${today()}.txt`,document.getElementById('employeeExportPreview').value)}
+function downloadEmployeeExportCSV(){
+  const calc=calculate(),id=document.getElementById('exportEmployee').value,b=calc.byEmp[id],e=data.employees.find(x=>x.id===id);
+  if(!b)return;
+  download(`medewerker_export_${(e.name||'medewerker').replace(/\s+/g,'_')}_${today()}.csv`,toCSV([['medewerker','verlofsaldo','overurensaldo'],[e.name,b.leaveBalance,b.overtimeBalance]]),'text/csv')
+}
+function openEmployeeMail(){
+  const to=document.getElementById('exportEmail').value,body=encodeURIComponent(document.getElementById('employeeExportPreview').value);
+  location.href=`mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent('Actueel verlof- en overurenoverzicht')}&body=${body}`
+}
+
+function importJSON(ev){
+  const file=ev.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      data=normalizeData(JSON.parse(reader.result));
+      data.backup.lastImport=nowIso();
+      data.backup.fileName=file.name;
+      addAudit('JSON geïmporteerd',file.name);
+      hasUnsavedChanges=true;
+      showTab('dashboard');
+      render();
+      alert('Import gelukt. Sla daarna zelf op naar het centrale bestand als dit de juiste data is.')
+    }catch(e){alert('Import mislukt: geen geldige JSON.')}
+  };
+  reader.readAsText(file)
+}
+
+function loadDemo(){
+  if(!requireData())return;
+  if(!confirm('Demo-data toevoegen?'))return;
+  if(!data.employees.length){
+    ['Sanne Kamps','Jeroen Bakker','Fatima El Amrani'].forEach(n=>data.employees.push({id:uid('EMP'),name:n,email:'',role:'Demo',contractHours:40,startLeaveHours:200,startOvertimeHours:0,status:'Actief',createdAt:nowIso(),updatedAt:nowIso()}))
+  }
+  const e=data.employees[0];
+  data.records.push({id:uid('REC'),employeeId:e.id,type:'Verlof aanvraag',startDate:today(),endDate:today(),hours:8,status:'Aangevraagd',category:'Vakantie',manager:manager(),note:'Demo-aanvraag',createdAt:nowIso(),updatedAt:nowIso()});
+  addAudit('Demo geladen','Demo-data toegevoegd');
+  render()
+}
+
+function clearAllData(){
+  if(!requireData())return;
+  if(!confirm('Alles leegmaken? Maak eerst een back-up als dit echte data is.'))return;
+  const oldFile=data.backup.fileName;
+  data=emptyData();
+  data.backup.fileName=oldFile;
+  addAudit('Alles leeggemaakt','Nieuwe lege v8-dataset gestart');
+  render()
+}
+
+window.addEventListener('beforeunload',e=>{if(hasUnsavedChanges){e.preventDefault();e.returnValue=''}});
+render();
+</script>
+</body>
+</html>
