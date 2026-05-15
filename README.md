@@ -2,6 +2,8 @@
 
 Dit is een single-file HTML-dashboard voor verlof, overuren en ziekte. Het leidinggevende-dashboard blijft de centrale waarheid: de grote centrale JSON bevat de volledige administratie en wordt beheerd door de leidinggevende.
 
+Zie [HANDLEIDING.md](HANDLEIDING.md) voor de volledige werkinstructie voor leidinggevenden en medewerkers.
+
 ## Medewerkerportaal-export
 
 De tab **Medewerkerportaal export** maakt per actieve medewerker een klein saldo-JSON-bestand voor het aparte medewerkersdashboard. Deze bestanden zijn alleen kijkkopieën. Het medewerkersdashboard mag de centrale data niet aanpassen.
