@@ -16,6 +16,8 @@ body{margin:0;background:linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%);font-
 .top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:18px}
 h1{margin:0;font-size:32px}.sub{color:var(--muted);margin-top:6px;line-height:1.5}
 .pill{background:#eef2ff;color:#3730a3;padding:10px 14px;border-radius:999px;font-size:14px;font-weight:800}
+.brand-block{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+.brand-logo{width:118px;height:64px;object-fit:cover;object-position:center;border-radius:16px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.85)}
 .tabs{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
 .tab-btn{border:1px solid var(--line);background:#fff;color:#111827;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:800}
 .tab-btn.active{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-color:transparent}
@@ -54,7 +56,7 @@ th{color:var(--muted);font-weight:800}
 .weekday-settings{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.weekday-settings label{display:flex;gap:6px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px;margin:0;color:var(--text);font-weight:800}.weekday-settings input{width:auto;padding:0}
 .filterbar{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px}
 @media(max-width:1100px){.kpis,.three,.two,.hero-grid,.filterbar{grid-template-columns:1fr}.bar-row{grid-template-columns:1fr}.calendar-grid{grid-template-columns:1fr 1fr}.weekday-settings{grid-template-columns:1fr 1fr}}
-@media(max-width:640px){.form{grid-template-columns:1fr}.calendar-grid,.weekday-settings{grid-template-columns:1fr}h1{font-size:26px}.wrap{padding:14px}}
+@media(max-width:640px){.form{grid-template-columns:1fr}.calendar-grid,.weekday-settings{grid-template-columns:1fr}h1{font-size:26px}.wrap{padding:14px}.brand-block{justify-content:flex-start}.brand-logo{width:104px;height:56px}}
 </style>
 </head>
 <body>
@@ -64,7 +66,10 @@ th{color:var(--muted);font-weight:800}
       <h1>Verlof, overuren en ziekte Dashboard</h1>
       <div class="sub">v8 privacy master. GitHub Pages toont alleen de app. Personeelsdata wordt pas zichtbaar nadat een centraal JSON-bestand uit OneDrive/SharePoint is geopend.</div>
     </div>
-    <div class="pill">v8 • privacy-modus</div>
+    <div class="brand-block">
+      <img class="brand-logo" src="assets/dba-asn-logo.jpg" alt="DBA en ASN Bank logo">
+      <div class="pill">v8 • privacy-modus</div>
+    </div>
   </div>
 
   <div class="hero">
@@ -82,6 +87,7 @@ th{color:var(--muted);font-weight:800}
 
   <div class="tabs">
     <button class="tab-btn active" data-tab="start">Start & opslag</button>
+    <button class="tab-btn" data-tab="medewerker-aanvraag">Verlof aanvragen</button>
     <button class="tab-btn" data-tab="dashboard">Dashboard</button>
     <button class="tab-btn" data-tab="medewerkers">Medewerkers</button>
     <button class="tab-btn" data-tab="nieuwe-registratie">Nieuwe registratie</button>
@@ -93,6 +99,7 @@ th{color:var(--muted);font-weight:800}
     <button class="tab-btn" data-tab="controles">Controles</button>
     <button class="tab-btn" data-tab="jaaroverzicht">Jaaroverzicht</button>
     <button class="tab-btn" data-tab="medewerker-export">Medewerker export</button>
+    <button class="tab-btn" data-tab="medewerkerportaal-export">Medewerkerportaal export</button>
     <button class="tab-btn" data-tab="auditlog">Auditlog</button>
     <button class="tab-btn" data-tab="backup">Export</button>
   </div>
@@ -104,6 +111,8 @@ th{color:var(--muted);font-weight:800}
         <div class="form">
           <div><label>Naam leidinggevende</label><input id="managerName" placeholder="Bijv. Petra of Mark"></div>
           <div><label>Status</label><input id="dataStatus" readonly value="Geen data geladen"></div>
+          <div><label>E-mail leidinggevende 1</label><input id="managerEmail1" type="email" placeholder="leidinggevende1@bedrijf.nl" oninput="rememberManagerEmails()"></div>
+          <div><label>E-mail leidinggevende 2</label><input id="managerEmail2" type="email" placeholder="leidinggevende2@bedrijf.nl" oninput="rememberManagerEmails()"></div>
           <div class="full toolbar">
             <button onclick="openCentralFile()">Open centraal JSON-bestand</button>
             <button class="btn-secondary" onclick="createCentralFile()">Maak nieuw centraal bestand</button>
@@ -118,6 +127,7 @@ th{color:var(--muted);font-weight:800}
         <div class="notice" style="margin-top:14px">
           <strong>Veiligheidskeuze:</strong> dit dashboard gebruikt geen localStorage voor medewerkers, verlof, ziekte, overuren of auditlog. Na opnieuw openen is het dashboard leeg totdat je het centrale JSON-bestand kiest.
         </div>
+        <div class="info-box" style="margin-top:14px">De e-mailadressen hierboven worden gebruikt voor het medewerkerformulier. Ze worden ook meegenomen in het centrale JSON-bestand zodra je opslaat.</div>
       </div>
       <div class="card">
         <h2>Werkwijze voor 2 leidinggevenden</h2>
@@ -129,6 +139,33 @@ th{color:var(--muted);font-weight:800}
           <div class="row"><div>5. Gebruik Opslaan & veilig afsluiten</div><span class="tag bad">Wist lokale data</span></div>
         </div>
         <div id="lockWarning" style="margin-top:14px"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-medewerker-aanvraag">
+    <div class="grid two">
+      <div class="card">
+        <h2>Verlofaanvraag medewerker</h2>
+        <div class="form">
+          <div><label>Naam medewerker</label><input id="req-name" autocomplete="name"></div>
+          <div><label>E-mailadres medewerker</label><input id="req-email" type="email" autocomplete="email"></div>
+          <div><label>Startdatum</label><input id="req-start" type="date"></div>
+          <div><label>Einddatum</label><input id="req-end" type="date"></div>
+          <div><label>Aantal uren</label><input id="req-hours" type="number" step="0.01"></div>
+          <div><label>Categorie</label><select id="req-category"><option>Vakantie</option><option>Vrije dag</option><option>Bijzonder verlof</option><option>Anders</option></select></div>
+          <div class="full"><label>Toelichting</label><input id="req-note" placeholder="Bijv. gewenste vrije dag of korte zakelijke toelichting"></div>
+          <div class="full toolbar">
+            <button onclick="sendLeaveRequestMail()">Verlofaanvraag verzenden</button>
+            <button class="btn-gray" onclick="resetLeaveRequestForm()">Formulier leegmaken</button>
+          </div>
+        </div>
+        <div id="requestMailStatus" class="status-box" style="margin-top:14px"></div>
+      </div>
+      <div class="card">
+        <h2>Ontvangers</h2>
+        <div class="list" id="requestRecipients"></div>
+        <div class="notice" style="margin-top:14px">Na verzenden opent je mailprogramma met beide leidinggevenden als ontvanger. Controleer en verstuur de mail daar definitief.</div>
       </div>
     </div>
   </section>
@@ -165,6 +202,12 @@ th{color:var(--muted);font-weight:800}
           <div><label>Naam</label><input id="e-name"></div>
           <div><label>E-mailadres</label><input id="e-email" type="email"></div>
           <div><label>Functie / team</label><input id="e-role"></div>
+          <div>
+            <label>Persoonlijke portaalcode</label>
+            <input id="e-portal-code" placeholder="Bijv. JAN7392">
+            <div class="small">Deze code gebruikt de medewerker om zijn of haar saldo te bekijken in het medewerkersdashboard.</div>
+          </div>
+          <div style="display:flex;align-items:end"><button type="button" class="btn-secondary" onclick="generateCodeForEmployeeForm()">Genereer code</button></div>
           <div><label>Contracturen per week</label><input id="e-contract" type="number" step="0.01" value="40"></div>
           <div><label>Startsaldo verlofuren</label><input id="e-leave" type="number" step="0.01" value="200"></div>
           <div><label>Startsaldo overuren</label><input id="e-overtime" type="number" step="0.01" value="0"></div>
@@ -221,6 +264,31 @@ th{color:var(--muted);font-weight:800}
   <section class="panel" id="tab-controles"><div class="grid two"><div class="card"><h2>Waarschuwingen</h2><div id="warningsList"></div></div><div class="card"><h2>Controlepunten</h2><div id="checkList"></div></div></div></section>
   <section class="panel" id="tab-jaaroverzicht"><div class="grid two"><div class="card"><h2>Jaaroverzicht per medewerker</h2><div id="yearEmployeeTable"></div></div><div class="card"><h2>Jaar samenvatting</h2><div id="yearSummary" class="list"></div><div class="toolbar" style="margin-top:14px"><button onclick="downloadYearSummary()">Jaaroverzicht TXT</button><button class="btn-secondary" onclick="copyYearSummary()">Kopieer samenvatting</button></div></div></div></section>
   <section class="panel" id="tab-medewerker-export"><div class="grid two"><div class="card"><h2>Individuele medewerkerexport</h2><div class="form"><div><label>Medewerker</label><select id="exportEmployee" onchange="render()"></select></div><div><label>E-mailadres</label><input id="exportEmail" type="email"></div><div class="full"><label>Tekst voor medewerker</label><textarea id="employeeExportPreview" readonly></textarea></div><div class="full toolbar"><button onclick="copyEmployeeExport()">Tekst kopiëren</button><button class="btn-secondary" onclick="downloadEmployeeExportTXT()">TXT export</button><button class="btn-secondary" onclick="downloadEmployeeExportCSV()">CSV export</button><button class="btn-soft" onclick="openEmployeeMail()">Mailconcept openen</button></div></div></div><div class="card"><h2>Samenvatting</h2><div id="employeeExportSummary" class="list"></div></div></div></section>
+  <section class="panel" id="tab-medewerkerportaal-export">
+    <div class="grid two">
+      <div class="card">
+        <h2>Medewerkerportaal export</h2>
+        <div class="info-box">Gebruik deze export om per medewerker een klein saldobestand te maken voor het medewerkersdashboard. De grote centrale JSON blijft leidend. De medewerkerbestanden zijn alleen een kijkkopie.</div>
+        <div class="notice" style="margin-top:14px"><strong>Let op:</strong> zet deze saldo-JSON-bestanden niet in een publieke GitHub-repo. Plaats ze alleen op een afgeschermde locatie, bijvoorbeeld SharePoint/OneDrive, of gebruik alleen testdata in publieke omgevingen.</div>
+        <div class="form" style="margin-top:14px">
+          <div class="full"><label>E-mailadres leidinggevende voor aanvragen</label><input id="portalManagerEmail" type="email" placeholder="leidinggevende@bedrijf.nl" oninput="rememberPortalManagerEmail()"></div>
+          <div class="full toolbar">
+            <button onclick="downloadPortalZip()">Download alle saldibestanden als ZIP</button>
+            <button class="btn-secondary" onclick="savePortalFilesToFolder()">Kies map en sla losse saldibestanden op</button>
+            <button class="btn-secondary" onclick="downloadPortalLinksCSV()">Download medewerker-links CSV</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Exportstatus</h2>
+        <div id="portalExportSummary" class="list"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2>Preview actieve medewerkers</h2>
+      <div id="portalExportTable"></div>
+    </div>
+  </section>
   <section class="panel" id="tab-auditlog"><div class="card"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><h2 style="margin:0">Auditlog</h2><div class="toolbar"><button class="btn-secondary" onclick="downloadAuditCSV()">Auditlog CSV</button><button class="btn-gray" onclick="render()">Vernieuwen</button></div></div><div id="auditTable" style="margin-top:12px"></div></div></section>
   <section class="panel" id="tab-backup"><div class="grid two"><div class="card"><h2>Export en reservekopie</h2><div class="toolbar"><button onclick="downloadJSON()">JSON reservekopie downloaden</button><button class="btn-secondary" onclick="downloadCSV()">CSV export</button><button class="btn-secondary" onclick="downloadAuditCSV()">Auditlog CSV</button></div><div id="backupStatus" class="status-box" style="margin-top:12px"></div><div class="notice" style="margin-top:14px">Een download is een losse kopie. De centrale waarheid blijft het gekozen OneDrive/SharePoint JSON-bestand.</div></div><div class="card"><h2>Import losse JSON</h2><label class="btn-secondary" style="display:inline-flex;align-items:center;padding:12px 16px;border-radius:12px;color:#fff;cursor:pointer">JSON importeren<input type="file" id="jsonFile" accept=".json" style="display:none" onchange="importJSON(event)"></label><div class="small" style="margin-top:12px">Import laadt data in de huidige sessie. Sla daarna zelf op naar het centrale bestand.</div></div></div><div class="grid two" style="margin-top:16px"><div class="card"><h2>Ruwe data medewerkers</h2><textarea id="rawEmployees" readonly></textarea></div><div class="card"><h2>Ruwe data registraties</h2><textarea id="rawRecords" readonly></textarea></div></div></section>
 </div>
@@ -229,6 +297,9 @@ th{color:var(--muted);font-weight:800}
 const APP_VERSION='v8';
 const SCHEMA_VERSION=3;
 const MANAGER_KEY='verlof_dashboard_v8_manager_name';
+const MANAGER_EMAILS_KEY='verlof_dashboard_v8_manager_emails';
+const PORTAL_MANAGER_EMAIL_KEY='verlof_dashboard_v8_portal_manager_email';
+const DEFAULT_MANAGER_EMAILS=['',''];
 let data=null;
 let centralFileHandle=null;
 let currentSessionId='S-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
@@ -246,6 +317,69 @@ function html(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&
 function dateInRange(t,s,e){const x=new Date(t+'T12:00:00'),a=new Date(s+'T00:00:00'),b=new Date((e||s)+'T23:59:59');return x>=a&&x<=b}
 function manager(){return document.getElementById('managerName').value.trim()||'Onbekende leidinggevende'}
 function rememberManager(){localStorage.setItem(MANAGER_KEY,manager())}
+function emailOk(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim())}
+function managerEmails(){
+  return ['managerEmail1','managerEmail2'].map(id=>document.getElementById(id)?.value.trim()).filter(Boolean)
+}
+function cleanPortalCode(v){return String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'')}
+function employeeInitialsCode(name){
+  const letters=String(name||'TEST').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z]/g,'').toUpperCase();
+  return (letters.slice(0,3)||'EMP').padEnd(3,'X')
+}
+function usedPortalCodes(exceptId=''){
+  return new Set((data?.employees||[]).filter(e=>e.id!==exceptId).map(e=>cleanPortalCode(e.portalCode)).filter(Boolean))
+}
+function generatePortalCode(name='TEST',exceptId=''){
+  const used=usedPortalCodes(exceptId),prefix=employeeInitialsCode(name);
+  for(let i=0;i<500;i++){
+    const code=prefix+String(Math.floor(1000+Math.random()*9000));
+    if(!used.has(code))return code
+  }
+  for(let i=1;i<10000;i++){
+    const code='TEST'+String(i).padStart(3,'0');
+    if(!used.has(code))return code
+  }
+  return uid('CODE').replace(/[^A-Z0-9]/g,'').slice(0,12)
+}
+function rememberManagerEmails(){
+  const emails=managerEmails();
+  localStorage.setItem(MANAGER_EMAILS_KEY,JSON.stringify(emails));
+  if(data){
+    data.settings.managerEmails=emails;
+    markDirty()
+  }
+  renderRequestRecipients()
+}
+function storedManagerEmails(){
+  try{
+    const stored=JSON.parse(localStorage.getItem(MANAGER_EMAILS_KEY)||'[]');
+    if(Array.isArray(stored)&&stored.length)return stored
+  }catch(e){}
+  return data?.settings?.managerEmails?.length?data.settings.managerEmails:DEFAULT_MANAGER_EMAILS
+}
+function fillManagerEmailFields(){
+  const emails=storedManagerEmails();
+  const e1=document.getElementById('managerEmail1'),e2=document.getElementById('managerEmail2');
+  if(e1&&!e1.value)e1.value=emails[0]||'';
+  if(e2&&!e2.value)e2.value=emails[1]||''
+}
+function portalManagerEmailValue(){
+  return document.getElementById('portalManagerEmail')?.value.trim()||data?.settings?.portalManagerEmail||managerEmails()[0]||''
+}
+function rememberPortalManagerEmail(){
+  const email=document.getElementById('portalManagerEmail')?.value.trim()||'';
+  localStorage.setItem(PORTAL_MANAGER_EMAIL_KEY,email);
+  if(data){
+    data.settings.portalManagerEmail=email;
+    markDirty()
+  }
+  renderPortalExport(calculate())
+}
+function fillPortalManagerEmailField(){
+  const el=document.getElementById('portalManagerEmail');
+  if(!el)return;
+  if(!el.value)el.value=data?.settings?.portalManagerEmail||localStorage.getItem(PORTAL_MANAGER_EMAIL_KEY)||managerEmails()[0]||''
+}
 
 function emptyData(){
   return{
@@ -258,7 +392,7 @@ function emptyData(){
     updatedBy:'',
     employees:[],
     records:[],
-    settings:{fixedFreeDays:[0,6]},
+    settings:{fixedFreeDays:[0,6],managerEmails:[...DEFAULT_MANAGER_EMAILS],portalManagerEmail:''},
     auditLog:[],
     lock:null,
     backup:{lastJsonDownload:null,lastImport:null,lastCentralSave:null,lastCentralLoad:null,fileName:null}
@@ -276,6 +410,7 @@ function normalizeData(d){
   out.settings={...base.settings,...(d.settings||{})};
   out.backup={...base.backup,...(d.backup||{})};
   out.employees=Array.isArray(d.employees)?d.employees:[];
+  out.employees.forEach(e=>{e.portalCode=cleanPortalCode(e.portalCode)});
   out.records=Array.isArray(d.records)?d.records:[];
   out.auditLog=Array.isArray(d.auditLog)?d.auditLog:[];
   out.lock=d.lock||null;
@@ -308,6 +443,69 @@ function renderStatus(){
   el.value=`${data.backup.fileName||'Bestand geladen'} • revisie ${data.revision}${hasUnsavedChanges?' • niet opgeslagen':''}`
 }
 
+function renderRequestRecipients(){
+  const el=document.getElementById('requestRecipients');
+  if(!el)return;
+  fillManagerEmailFields();
+  const emails=managerEmails();
+  el.innerHTML=emails.length?emails.map((email,i)=>`<div class="row"><div>Leidinggevende ${i+1}</div><strong>${html(email)}</strong></div>`).join(''):'<div class="empty">Vul eerst de twee e-mailadressen van de leidinggevenden in bij Start & opslag.</div>';
+}
+
+function leaveRequestBody(){
+  const name=document.getElementById('req-name').value.trim();
+  const email=document.getElementById('req-email').value.trim();
+  const start=document.getElementById('req-start').value;
+  const end=document.getElementById('req-end').value;
+  const hours=document.getElementById('req-hours').value;
+  const category=document.getElementById('req-category').value;
+  const note=document.getElementById('req-note').value.trim();
+  return [
+    'Beste leidinggevenden,',
+    '',
+    'Hierbij dien ik een verlofaanvraag in.',
+    '',
+    `Naam medewerker: ${name}`,
+    `E-mailadres medewerker: ${email}`,
+    `Startdatum: ${shortDate(start)}`,
+    `Einddatum: ${shortDate(end||start)}`,
+    `Aantal uren: ${fmtHours(hours)}`,
+    `Categorie: ${category}`,
+    `Toelichting: ${note||'-'}`,
+    '',
+    'Willen jullie deze aanvraag beoordelen en daarna verwerken in het verlofdashboard?',
+    '',
+    'Met vriendelijke groet,',
+    name
+  ].join('\n')
+}
+
+function sendLeaveRequestMail(){
+  fillManagerEmailFields();
+  const recipients=managerEmails();
+  const name=document.getElementById('req-name').value.trim();
+  const email=document.getElementById('req-email').value.trim();
+  const start=document.getElementById('req-start').value;
+  const end=document.getElementById('req-end').value;
+  const hours=num(document.getElementById('req-hours').value);
+  const status=document.getElementById('requestMailStatus');
+  if(recipients.length<2)return alert('Vul eerst beide e-mailadressen van de leidinggevenden in bij Start & opslag.');
+  if(recipients.some(e=>!emailOk(e)))return alert('Controleer de e-mailadressen van de leidinggevenden.');
+  if(!name)return alert('Vul je naam in.');
+  if(!emailOk(email))return alert('Vul een geldig e-mailadres van de medewerker in.');
+  if(!start)return alert('Vul een startdatum in.');
+  if(end&&end<start)return alert('Einddatum mag niet vóór startdatum liggen.');
+  if(hours<=0)return alert('Vul een positief aantal uren in.');
+  const subject=`Verlofaanvraag ${name} - ${shortDate(start)}`;
+  location.href=`mailto:${recipients.map(encodeURIComponent).join(',')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(leaveRequestBody())}`;
+  status.innerHTML='Je mailprogramma is geopend met beide leidinggevenden als ontvanger. Verstuur de mail daar definitief.';
+}
+
+function resetLeaveRequestForm(){
+  ['req-name','req-email','req-start','req-end','req-hours','req-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('req-category').value='Vakantie';
+  document.getElementById('requestMailStatus').innerHTML=''
+}
+
 function lockIsActive(lock){
   if(!lock||!lock.at)return false;
   return Date.now()-new Date(lock.at).getTime()<2*60*60*1000
@@ -328,6 +526,9 @@ async function openCentralFile(){
     if(!ok)return
   }
   data=loaded;
+  fillManagerEmailFields();
+  data.settings.managerEmails=managerEmails();
+  fillPortalManagerEmailField();
   data.backup.fileName=file.name;
   data.backup.lastCentralLoad=nowIso();
   data.lock={by:name,at:nowIso(),sessionId:currentSessionId};
@@ -345,6 +546,10 @@ async function createCentralFile(){
   if(!window.showSaveFilePicker)return alert('Gebruik Chrome of Edge.');
   centralFileHandle=await showSaveFilePicker({suggestedName:`verlof_dashboard_centraal_${today()}.json`,types:[{description:'JSON opslagbestand',accept:{'application/json':['.json']}}]});
   data=emptyData();
+  fillManagerEmailFields();
+  data.settings.managerEmails=managerEmails();
+  fillPortalManagerEmailField();
+  data.settings.portalManagerEmail=portalManagerEmailValue();
   data.backup.fileName=centralFileHandle.name||'centraal opslagbestand';
   data.lock={by:name,at:nowIso(),sessionId:currentSessionId};
   addAudit('Centraal bestand aangemaakt',data.backup.fileName);
@@ -377,6 +582,8 @@ async function writeCentralFile(opts={}){
   data.loadedRevision=data.revision;
   data.updatedAt=nowIso();
   data.updatedBy=manager();
+  data.settings.managerEmails=managerEmails();
+  data.settings.portalManagerEmail=portalManagerEmailValue();
   data.backup.lastCentralSave=nowIso();
   data.backup.fileName=centralFileHandle.name||data.backup.fileName;
   const clean=JSON.parse(JSON.stringify(data));
@@ -392,6 +599,7 @@ async function writeCentralFile(opts={}){
 async function saveToCentralFile(){
   if(!requireData())return;
   rememberManager();
+  rememberManagerEmails();
   addAudit('Handmatig opgeslagen','Opslag naar centraal bestand gestart');
   const ok=await writeCentralFile();
   if(ok){alert('Opgeslagen naar het centrale JSON-bestand.');render()}
@@ -474,8 +682,10 @@ function saveEmployeeForm(){
   if(!requireData())return;
   const id=document.getElementById('e-edit-id').value;
   const name=document.getElementById('e-name').value.trim();
+  const portalCode=cleanPortalCode(document.getElementById('e-portal-code').value);
   if(!name)return alert('Vul een naam in.');
-  const item={id:id||uid('EMP'),name,email:document.getElementById('e-email').value.trim(),role:document.getElementById('e-role').value.trim(),contractHours:num(document.getElementById('e-contract').value),startLeaveHours:num(document.getElementById('e-leave').value),startOvertimeHours:num(document.getElementById('e-overtime').value),status:document.getElementById('e-status').value,updatedAt:nowIso()};
+  if(portalCode&&usedPortalCodes(id).has(portalCode))return alert('Deze persoonlijke portaalcode is al in gebruik. Kies of genereer een unieke code.');
+  const item={id:id||uid('EMP'),name,email:document.getElementById('e-email').value.trim(),role:document.getElementById('e-role').value.trim(),portalCode,contractHours:num(document.getElementById('e-contract').value),startLeaveHours:num(document.getElementById('e-leave').value),startOvertimeHours:num(document.getElementById('e-overtime').value),status:document.getElementById('e-status').value,updatedAt:nowIso()};
   if(id){
     const i=data.employees.findIndex(e=>e.id===id),before=data.employees[i];
     item.createdAt=before.createdAt||nowIso();
@@ -497,6 +707,7 @@ function editEmployee(id){
   document.getElementById('e-name').value=e.name||'';
   document.getElementById('e-email').value=e.email||'';
   document.getElementById('e-role').value=e.role||'';
+  document.getElementById('e-portal-code').value=cleanPortalCode(e.portalCode);
   document.getElementById('e-contract').value=e.contractHours||40;
   document.getElementById('e-leave').value=e.startLeaveHours||0;
   document.getElementById('e-overtime').value=e.startOvertimeHours||0;
@@ -508,7 +719,7 @@ function editEmployee(id){
 }
 
 function cancelEmployeeEdit(doRender=true){
-  ['e-edit-id','e-name','e-email','e-role'].forEach(id=>document.getElementById(id).value='');
+  ['e-edit-id','e-name','e-email','e-role','e-portal-code'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('e-contract').value=40;
   document.getElementById('e-leave').value=200;
   document.getElementById('e-overtime').value=0;
@@ -519,10 +730,21 @@ function cancelEmployeeEdit(doRender=true){
   if(doRender)render()
 }
 
+function generateCodeForEmployeeForm(){
+  if(!requireData())return;
+  const id=document.getElementById('e-edit-id').value;
+  const name=document.getElementById('e-name').value.trim();
+  document.getElementById('e-portal-code').value=generatePortalCode(name,id)
+}
+
 function loadDefaultEmployees(){
   if(!requireData())return;
   if(!confirm('Voorbeeldmedewerkers toevoegen?'))return;
-  ['Sanne Kamps','Jeroen Bakker','Fatima El Amrani','Lars de Vries','Kim Jansen','Noah Smit','Eva Bos','Mila Visser','Daan Peters','Sara Meijer'].forEach((n,i)=>data.employees.push({id:uid('EMP'),name:n,email:'',role:i<5?'Team A':'Team B',contractHours:40,startLeaveHours:200,startOvertimeHours:0,status:'Actief',createdAt:nowIso(),updatedAt:nowIso()}));
+  ['Sanne Kamps','Jeroen Bakker','Fatima El Amrani','Lars de Vries','Kim Jansen','Noah Smit','Eva Bos','Mila Visser','Daan Peters','Sara Meijer'].forEach((n,i)=>{
+    let code='TEST'+String(i+1).padStart(3,'0');
+    if(usedPortalCodes().has(code))code=generatePortalCode(n);
+    data.employees.push({id:uid('EMP'),name:n,email:'',role:i<5?'Team A':'Team B',portalCode:code,contractHours:40,startLeaveHours:200,startOvertimeHours:0,status:'Actief',createdAt:nowIso(),updatedAt:nowIso()})
+  });
   addAudit('Voorbeeldmedewerkers geladen','10 voorbeeldmedewerkers toegevoegd');
   render()
 }
@@ -597,6 +819,9 @@ function table(headers,rows){
 
 function render(){
   document.getElementById('managerName').value=document.getElementById('managerName').value||localStorage.getItem(MANAGER_KEY)||'';
+  fillManagerEmailFields();
+  fillPortalManagerEmailField();
+  renderRequestRecipients();
   renderStatus();
   document.getElementById('dashboardContent').style.display=data?'block':'none';
   document.getElementById('lockedDashboard').style.display=data?'none':'block';
@@ -624,6 +849,7 @@ function render(){
   renderYear(calc);
   renderBalanceExplanation(calc);
   renderEmployeeExport(calc);
+  renderPortalExport(calc);
   renderAudit();
   document.getElementById('rawEmployees').value=JSON.stringify(data.employees,null,2);
   document.getElementById('rawRecords').value=JSON.stringify(data.records,null,2)
@@ -764,6 +990,132 @@ function renderEmployeeExport(calc){
   document.getElementById('employeeExportSummary').innerHTML=b?`<div class="row"><div>Medewerker</div><strong>${html(e.name)}</strong></div><div class="row"><div>Verlofsaldo</div><strong>${fmtHours(b.leaveBalance)}</strong></div><div class="row"><div>Overurensaldo</div><strong>${fmtHours(b.overtimeBalance)}</strong></div>`:'<div class="empty">Geen medewerker geselecteerd.</div>'
 }
 
+function localDateTimeText(){
+  const d=new Date(),pad=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+function roundHours(v){return Math.round(num(v)*100)/100}
+function portalExportFilename(code){return `saldo-${cleanPortalCode(code)}.json`}
+function portalExportRows(calc){
+  const updated=localDateTimeText(),leidinggevendeEmail=portalManagerEmailValue();
+  return activeEmployees().map(e=>{
+    const b=calc.byEmp[e.id]||{};
+    const code=cleanPortalCode(e.portalCode);
+    return{
+      employee:e,
+      fileName:portalExportFilename(code),
+      status:[!code?'Geen portaalcode':'',!e.email?'Geen e-mail':'',code&&usedPortalCodes(e.id).has(code)?'Dubbele code':''].filter(Boolean),
+      payload:{
+        code,
+        naam:e.name||'',
+        email:e.email||'',
+        leidinggevendeEmail,
+        verlofsaldo:roundHours(b.leaveBalance),
+        overurensaldo:roundHours(b.overtimeBalance),
+        laatstBijgewerkt:updated
+      }
+    }
+  })
+}
+function renderPortalExport(calc){
+  const summary=document.getElementById('portalExportSummary'),tableEl=document.getElementById('portalExportTable');
+  if(!summary||!tableEl)return;
+  const rows=portalExportRows(calc);
+  const missingCode=rows.filter(r=>!r.payload.code).length,missingEmail=rows.filter(r=>!r.payload.email).length,duplicateCode=rows.filter(r=>r.status.includes('Dubbele code')).length;
+  const managerEmail=portalManagerEmailValue();
+  summary.innerHTML=[
+    `<div class="row"><div>Actieve medewerkers</div><strong>${rows.length}</strong></div>`,
+    `<div class="row"><div>Leidinggevende e-mail</div><strong>${html(managerEmail||'Niet ingevuld')}</strong></div>`,
+    `<div class="row"><div>Ontbrekende portaalcodes</div><span class="tag ${missingCode?'warn':'ok'}">${missingCode}</span></div>`,
+    `<div class="row"><div>Ontbrekende e-mails</div><span class="tag ${missingEmail?'warn':'ok'}">${missingEmail}</span></div>`,
+    `<div class="row"><div>Dubbele codes</div><span class="tag ${duplicateCode?'bad':'ok'}">${duplicateCode}</span></div>`
+  ].join('');
+  const trs=rows.map(r=>`<tr><td>${html(r.employee.name)}</td><td>${html(r.employee.email||'')}</td><td>${html(r.payload.code||'')}</td><td>${fmtHours(r.payload.verlofsaldo)}</td><td>${fmtHours(r.payload.overurensaldo)}</td><td>${html(r.fileName)}</td><td>${r.status.length?`<span class="tag warn">${html(r.status.join(', '))}</span>`:'<span class="tag ok">Klaar</span>'}</td></tr>`);
+  tableEl.innerHTML=table(['Naam','E-mail','Portaalcode','Verlofsaldo','Overurensaldo','Bestandsnaam','Status'],trs)
+}
+function assertPortalExportReady(rows){
+  const email=portalManagerEmailValue();
+  if(!emailOk(email))return alert('Vul een geldig e-mailadres van de leidinggevende in voor aanvragen.'),false;
+  const blockers=rows.filter(r=>!r.payload.code||r.status.includes('Dubbele code'));
+  if(blockers.length)return alert('Niet alle actieve medewerkers hebben een unieke portaalcode. Vul ontbrekende codes aan of gebruik "Genereer code" in het medewerkerformulier.'),false;
+  return true
+}
+function toCommaCSV(rows){return rows.map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\n')}
+function crc32(bytes){
+  if(!crc32.table){
+    crc32.table=Array.from({length:256},(_,n)=>{let c=n;for(let k=0;k<8;k++)c=c&1?0xedb88320^(c>>>1):c>>>1;return c>>>0})
+  }
+  let c=0xffffffff;
+  bytes.forEach(b=>{c=crc32.table[(c^b)&255]^(c>>>8)});
+  return (c^0xffffffff)>>>0
+}
+function u16(n){return [n&255,(n>>>8)&255]}
+function u32(n){return [n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]}
+function dosDateTime(d=new Date()){
+  const time=(d.getHours()<<11)|(d.getMinutes()<<5)|Math.floor(d.getSeconds()/2);
+  const date=((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate();
+  return{time,date}
+}
+function concatBytes(parts){
+  const len=parts.reduce((s,p)=>s+p.length,0),out=new Uint8Array(len);
+  let offset=0;parts.forEach(p=>{out.set(p,offset);offset+=p.length});
+  return out
+}
+function createZip(files){
+  const enc=new TextEncoder(),localParts=[],centralParts=[];
+  let offset=0;
+  files.forEach(file=>{
+    const nameBytes=enc.encode(file.path),dataBytes=enc.encode(file.text),crc=crc32(dataBytes),dt=dosDateTime();
+    const local=Uint8Array.from([80,75,3,4,...u16(20),...u16(0),...u16(0),...u16(dt.time),...u16(dt.date),...u32(crc),...u32(dataBytes.length),...u32(dataBytes.length),...u16(nameBytes.length),...u16(0),...nameBytes,...dataBytes]);
+    const central=Uint8Array.from([80,75,1,2,...u16(20),...u16(20),...u16(0),...u16(0),...u16(dt.time),...u16(dt.date),...u32(crc),...u32(dataBytes.length),...u32(dataBytes.length),...u16(nameBytes.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(offset),...nameBytes]);
+    localParts.push(local);centralParts.push(central);offset+=local.length
+  });
+  const centralSize=centralParts.reduce((s,p)=>s+p.length,0);
+  const end=Uint8Array.from([80,75,5,6,...u16(0),...u16(0),...u16(files.length),...u16(files.length),...u32(centralSize),...u32(offset),...u16(0)]);
+  return new Blob([concatBytes([...localParts,...centralParts,end])],{type:'application/zip'})
+}
+function downloadBlob(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href)}
+function downloadPortalZip(){
+  if(!requireData())return;
+  const calc=calculate(),rows=portalExportRows(calc);
+  if(!assertPortalExportReady(rows))return;
+  const files=rows.map(r=>({path:`saldi/${r.fileName}`,text:JSON.stringify(r.payload,null,2)}));
+  downloadBlob(`medewerkerportaal_saldi_${today()}.zip`,createZip(files));
+  addAudit('Medewerkerportaal-saldi geëxporteerd',`${rows.length} medewerkers geëxporteerd als ZIP`);
+  render()
+}
+async function savePortalFilesToFolder(){
+  if(!requireData())return;
+  if(!window.showDirectoryPicker)return alert('Map kiezen werkt alleen in moderne browsers zoals Chrome of Edge. Gebruik anders de ZIP-download en pak die uit in je OneDrive-map.');
+  const calc=calculate(),rows=portalExportRows(calc);
+  if(!assertPortalExportReady(rows))return;
+  try{
+    const root=await showDirectoryPicker({mode:'readwrite'});
+    const saldi=await root.getDirectoryHandle('saldi',{create:true});
+    for(const r of rows){
+      const handle=await saldi.getFileHandle(r.fileName,{create:true});
+      const writable=await handle.createWritable();
+      await writable.write(JSON.stringify(r.payload,null,2));
+      await writable.close()
+    }
+    addAudit('Medewerkerportaal-saldi geëxporteerd',`${rows.length} losse saldibestanden opgeslagen in gekozen map`);
+    alert(`Klaar. ${rows.length} saldibestanden opgeslagen in de map saldi.`);
+    render()
+  }catch(e){
+    if(e&&e.name==='AbortError')return;
+    alert('Opslaan in de gekozen map is mislukt. Controleer of je schrijfrechten hebt of gebruik de ZIP-download.')
+  }
+}
+function downloadPortalLinksCSV(){
+  if(!requireData())return;
+  const calc=calculate(),rows=portalExportRows(calc);
+  if(!assertPortalExportReady(rows))return;
+  const csvRows=[['Naam','Email','Code','Bestandsnaam','Voorbeeldlink']].concat(rows.map(r=>[r.employee.name,r.employee.email,r.payload.code,r.fileName,`medewerker.html?code=${r.payload.code}`]));
+  download(`medewerkerportaal_links_${today()}.csv`,toCommaCSV(csvRows),'text/csv');
+  addAudit('Medewerkerportaal-saldi geëxporteerd',`${rows.length} medewerkers opgenomen in links-CSV`);
+  render()
+}
+
 function renderAudit(){
   const rows=data.auditLog.map(a=>`<tr><td>${new Date(a.at).toLocaleString('nl-NL')}</td><td>${html(a.by||'')}</td><td>${html(a.action)}</td><td>${html(a.details||'')}</td><td>${html(a.employeeId?employeeName(a.employeeId):'')}</td></tr>`);
   document.getElementById('auditTable').innerHTML=table(['Moment','Door','Actie','Details','Medewerker'],rows)
@@ -831,7 +1183,11 @@ function loadDemo(){
   if(!requireData())return;
   if(!confirm('Demo-data toevoegen?'))return;
   if(!data.employees.length){
-    ['Sanne Kamps','Jeroen Bakker','Fatima El Amrani'].forEach(n=>data.employees.push({id:uid('EMP'),name:n,email:'',role:'Demo',contractHours:40,startLeaveHours:200,startOvertimeHours:0,status:'Actief',createdAt:nowIso(),updatedAt:nowIso()}))
+    ['Sanne Kamps','Jeroen Bakker','Fatima El Amrani'].forEach((n,i)=>data.employees.push({id:uid('EMP'),name:n,email:'',role:'Demo',portalCode:'TEST'+String(i+1).padStart(3,'0'),contractHours:40,startLeaveHours:200,startOvertimeHours:0,status:'Actief',createdAt:nowIso(),updatedAt:nowIso()}))
+  }else{
+    data.employees.forEach((e,i)=>{if(!cleanPortalCode(e.portalCode))e.portalCode='TEST'+String(i+1).padStart(3,'0')});
+    const seen=new Set();
+    data.employees.forEach(e=>{const code=cleanPortalCode(e.portalCode);if(seen.has(code))e.portalCode=generatePortalCode(e.name,e.id);seen.add(cleanPortalCode(e.portalCode))})
   }
   const e=data.employees[0];
   data.records.push({id:uid('REC'),employeeId:e.id,type:'Verlof aanvraag',startDate:today(),endDate:today(),hours:8,status:'Aangevraagd',category:'Vakantie',manager:manager(),note:'Demo-aanvraag',createdAt:nowIso(),updatedAt:nowIso()});
