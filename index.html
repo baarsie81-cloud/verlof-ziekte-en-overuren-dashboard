@@ -977,7 +977,7 @@ function employeeExportText(calc){
   if(!id&&data.employees[0])id=data.employees[0].id;
   const e=data.employees.find(x=>x.id===id),b=calc.byEmp[id];
   if(!e||!b)return'';
-  return`Beste ${e.name},\n\nHierbij je actuele overzicht uit de verlof-, overuren- en ziekteregistratie.\n\nVerlof:\n- Startsaldo: ${fmtHours(b.startLeave)}\n- Goedgekeurd verlof: ${fmtHours(b.leaveUsed)}\n- Correcties: ${fmtHours(b.leaveCorrections)}\n- Huidig verlofsaldo: ${fmtHours(b.leaveBalance)}\n\nOveruren:\n- Startsaldo: ${fmtHours(b.startOvertime)}\n- Opgebouwd: ${fmtHours(b.overtimeBuilt)}\n- Opgenomen: ${fmtHours(b.overtimeTaken)}\n- Correcties: ${fmtHours(b.overtimeCorrections)}\n- Huidig overurensaldo: ${fmtHours(b.overtimeBalance)}\n\nControleer dit overzicht en laat het weten als je denkt dat er iets niet klopt.\n\nMet vriendelijke groet,`
+  return`Beste ${e.name},\n\nHierbij je actuele overzicht uit de verlof- en overurenregistratie.\n\nVerlof:\n- Startsaldo: ${fmtHours(b.startLeave)}\n- Goedgekeurd verlof: ${fmtHours(b.leaveUsed)}\n- Correcties: ${fmtHours(b.leaveCorrections)}\n- Huidig verlofsaldo: ${fmtHours(b.leaveBalance)}\n\nOveruren:\n- Startsaldo: ${fmtHours(b.startOvertime)}\n- Opgebouwd: ${fmtHours(b.overtimeBuilt)}\n- Opgenomen: ${fmtHours(b.overtimeTaken)}\n- Correcties: ${fmtHours(b.overtimeCorrections)}\n- Huidig overurensaldo: ${fmtHours(b.overtimeBalance)}\n\nControleer dit overzicht en laat het weten als je denkt dat er iets niet klopt.\n\nMet vriendelijke groet,`
 }
 
 function renderEmployeeExport(calc){
